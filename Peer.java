@@ -5,25 +5,33 @@ import java.util.*;
 public class Peer{
   private String mc_addr;
   private int mc_port;
+  private String mdb_addr;
+  private int mdb_port;
+  private String mdr_addr;
+  private int mdr_port;
   private Client client;
   private Server server;
   private int serverid;
-  private AdvertiseThread thread;
+  private ServerThread thread;
 
-  public Peer(int server_id,String mc_addr, int mc_port) throws UnknownHostException, IOException, InterruptedException{
+  public Peer(int server_id,String mc_addr, int mc_port,String mdb_addr, int mdb_port,String mdr_addr, int mdr_port) throws UnknownHostException, IOException, InterruptedException{
     this.serverid = server_id;
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
-    this.client = new Client(this.mc_addr, this.mc_port);
-    this.server = new Server(this.mc_addr, this.mc_port, this.serverid);
+    this.mdb_addr = mdb_addr;
+    this.mdb_port = mdb_port;
+    this.mdr_addr = mdr_addr;
+    this.mdr_port = mdr_port;
+    this.client = new Client(this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
+    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
     this.thread = new ServerThread();
     this.thread.start();
   }
 
   //java Peer <protocol version> <server id> <access point> <MC> <MDB> <MDR>
-  //java <server id> <mc_addr> <mc_port>
+  //java Peer <server id> <mc_addr> <mc_port> <mdb_addr> <mdb_port> <mdr_addr> <mdr_port>
   public static void main(String [] args) throws UnknownHostException, IOException, InterruptedException{
-    Peer peer = new Peer(Integer.parseInt(args[0]),args[1], Integer.parseInt(args[2]));
+    Peer peer = new Peer(Integer.parseInt(args[0]),args[1], Integer.parseInt(args[2]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]));
     peer.sendMessage();
   }
 
@@ -36,8 +44,8 @@ public class Peer{
   private class ServerThread extends Thread{
     public void run(){
       try{
-        server.receiveMulticastMessage();
-      }catch(IOException e){
+        server.start_channels();
+      }catch(Exception e){
         System.out.println("Exception caught");
       }
     }
