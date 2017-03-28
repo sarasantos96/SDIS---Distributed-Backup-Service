@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.nio.*;
 
 public class Server{
   private String mc_addr;
@@ -41,6 +42,13 @@ public class Server{
     this.mdrthread.start();
   }
 
+  public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException{
+    String directory = new String("Peer"+this.server_id+"/receive.png");
+    FileOutputStream fos = new FileOutputStream(directory);
+    fos.write(receive_bytes);
+    fos.close();
+  }
+
   private class MCThread extends Thread {
     public void run(){
       try{
@@ -50,17 +58,17 @@ public class Server{
         mcsocket.joinGroup(mc_inetAddr);
 
         while(true){
-          byte[] buf = new byte[254];
+          byte[] buf = new byte[1000];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mcsocket.receive(packet);
           String msg = new String(packet.getData());
-          msg.trim();
+          //msg.trim();
           String [] rcv = msg.split(":");
           String message = new String(rcv[0].trim());
           int senderid = Integer.parseInt(rcv[1].trim());
-          System.out.println(server_id);
-          if(senderid != server_id)
+          if(senderid != server_id){
             System.out.println("MC message: "+message);
+          }
         }
       }catch(Exception e){
         System.out.println(e.getClass().getSimpleName());
@@ -77,17 +85,27 @@ public class Server{
         mdbsocket.joinGroup(mdb_inetAddr);
 
         while(true){
-          byte[] buf = new byte[254];
+          byte[] buf = new byte[80000];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mdbsocket.receive(packet);
-          String msg = new String(packet.getData());
-          msg.trim();
-          String [] rcv = msg.split(":");
-          String message = new String(rcv[0].trim());
+          byte[] input = packet.getData();
+          int i = input.length;
+          while (i-- > 0 && input[i] == '\00') {}
+
+          byte[] output = new byte[i+1];
+          System.arraycopy(input, 0, output, 0, i+1);
+          //String msg = new String(packet.getData());
+          //String msg_trim = msg.trim();
+          //System.out.println("After trim: "+ msg_trim.getBytes().length);
+          /*String [] rcv = msg_trim.split("::");
+          String command = new String(rcv[0].trim());
           int senderid = Integer.parseInt(rcv[1].trim());
-          System.out.println(server_id);
-          if(senderid != server_id)
-            System.out.println("MDB message: "+message);
+          byte[] body = rcv[2].getBytes();
+          System.out.println("body size : " + body.length);*/
+          if(server_id != 3){
+            System.out.println("MDB message: "+ "backup");
+            saveChunck(output);
+          }
         }
       }catch(Exception e){
         System.out.println("Exception caught");
@@ -112,7 +130,6 @@ public class Server{
           String [] rcv = msg.split(":");
           String message = new String(rcv[0].trim());
           int senderid = Integer.parseInt(rcv[1].trim());
-          System.out.println(server_id);
           if(senderid != server_id)
             System.out.println("MDR message: "+message);
         }
