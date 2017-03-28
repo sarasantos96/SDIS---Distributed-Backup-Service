@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+
 public class Peer{
   private String mc_addr;
   private int mc_port;
@@ -14,6 +15,7 @@ public class Peer{
   private int serverid;
   private ServerThread thread;
 
+  
   public Peer(int server_id,String mc_addr, int mc_port,String mdb_addr, int mdb_port,String mdr_addr, int mdr_port) throws UnknownHostException, IOException, InterruptedException{
     this.serverid = server_id;
     this.mc_addr = mc_addr;
@@ -22,10 +24,11 @@ public class Peer{
     this.mdb_port = mdb_port;
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
-    this.client = new Client(this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
+    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
     this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
     this.thread = new ServerThread();
     this.thread.start();
+
   }
 
   //java Peer <protocol version> <server id> <access point> <MC> <MDB> <MDR>
