@@ -27,9 +27,17 @@ public class Client implements RMI_Interface{
     return 0;
   }
 
-  public int backupRequest() throws IOException {
-    String message  = new String("hello");
-    sendMDBMessage(message, id);
+  public int rmiRequest(String type, String message) throws IOException {
+    switch(type){
+      case "Backup":
+        sendMDBMessage(message, id);
+        break;
+      case "Restore":
+        sendMDRMessage(message, id);
+        break;
+      default:
+        sendMCMessage(message, id);
+    }
     return 0;
   }
 
