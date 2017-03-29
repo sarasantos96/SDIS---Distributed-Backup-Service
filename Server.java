@@ -88,23 +88,10 @@ public class Server{
           byte[] buf = new byte[80000];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mdbsocket.receive(packet);
-          byte[] input = packet.getData();
-          int i = input.length;
-          while (i-- > 0 && input[i] == '\00') {}
-
-          byte[] output = new byte[i+1];
-          System.arraycopy(input, 0, output, 0, i+1);
-          //String msg = new String(packet.getData());
-          //String msg_trim = msg.trim();
-          //System.out.println("After trim: "+ msg_trim.getBytes().length);
-          /*String [] rcv = msg_trim.split("::");
-          String command = new String(rcv[0].trim());
-          int senderid = Integer.parseInt(rcv[1].trim());
-          byte[] body = rcv[2].getBytes();
-          System.out.println("body size : " + body.length);*/
+          Message msg = new Message(packet.getData());
           if(server_id != 3){
             System.out.println("MDB message: "+ "backup");
-            saveChunck(output);
+            saveChunck(msg.getBody());
           }
         }
       }catch(Exception e){

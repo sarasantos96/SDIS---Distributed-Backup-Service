@@ -15,7 +15,7 @@ public class Peer{
   private int serverid;
   private ServerThread thread;
 
-  
+
   public Peer(int server_id,String mc_addr, int mc_port,String mdb_addr, int mdb_port,String mdr_addr, int mdr_port) throws UnknownHostException, IOException, InterruptedException{
     this.serverid = server_id;
     this.mc_addr = mc_addr;
@@ -28,6 +28,10 @@ public class Peer{
     this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
     this.thread = new ServerThread();
     this.thread.start();
+
+    //Initialize folder for peer
+    String folder_name = new String("./Peer" + this.serverid);
+    boolean create_folder = (new File(folder_name)).mkdirs();
 
   }
 
