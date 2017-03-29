@@ -2,8 +2,12 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.nio.*;
+import java.rmi.registry.Registry;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
-public class Client{
+public class Client implements RMI_Interface{
   //Multicast
   private String mc_addr;
   private int mc_port;
@@ -17,14 +21,57 @@ public class Client{
   private MulticastSocket mdbsocket;
   private InetAddress mdraddr;
   private MulticastSocket mdrsocket;
+  private int id;
 
-  public Client(String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port) throws UnknownHostException, InterruptedException, IOException{
+  public int saySomething() { 
+    System.out.println("Something!!"); 
+    return 0; 
+  } 
+ 
+  public int rmiRequest(String type, String message) throws IOException { 
+    switch(type){ 
+      case "Backup": 
+        sendMDBMessage(message, id); 
+        break; 
+      case "Restore": 
+        sendMDRMessage(message, id); 
+        break; 
+      default: 
+        sendMCMessage(message, id); 
+    } 
+    return 0; 
+  } 
+ 
+  public Client() {} 
+ 
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, int whynot) throws UnknownHostException, InterruptedException, IOException { 
+    this.mc_addr = mc_addr; 
+    this.mc_port = mc_port; 
+    this.mdb_addr = mdb_addr; 
+    this.mdb_port = mdb_port; 
+    this.mdr_addr = mdr_addr; 
+    this.mdr_port = mdr_port; 
+    this.id = id; 
+ 
+    this.mcaddr = InetAddress.getByName(this.mc_addr); 
+    this.mcsocket = new MulticastSocket(this.mc_port); 
+    this.mcsocket.setTimeToLive(1); 
+    this.mdbaddr = InetAddress.getByName(this.mdb_addr); 
+    this.mdbsocket = new MulticastSocket(this.mdb_port); 
+    this.mdbsocket.setTimeToLive(1); 
+    this.mdraddr = InetAddress.getByName(this.mdr_addr); 
+    this.mdrsocket = new MulticastSocket(this.mdr_port); 
+    this.mdrsocket.setTimeToLive(1); 
+  } 
+
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port) throws UnknownHostException, InterruptedException, IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
     this.mdb_port = mdb_port;
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
+    this.id = id; 
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -35,6 +82,18 @@ public class Client{
     this.mdraddr = InetAddress.getByName(this.mdr_addr);
     this.mdrsocket = new MulticastSocket(this.mdr_port);
     this.mdrsocket.setTimeToLive(1);
+
+    System.out.println("Client ID : " + id); 
+    try{ 
+      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, 0); 
+      RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0); 
+ 
+      Registry registry = LocateRegistry.getRegistry(); 
+      registry.bind("RMI_Interface" + id, stub); 
+    }catch(Exception e){ 
+      System.err.println("Server exception: " + e.toString()); 
+      e.printStackTrace(); 
+    } 
   }
 
   public void sendMulticastMessage(int senderid) throws IOException{
