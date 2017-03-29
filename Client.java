@@ -23,46 +23,46 @@ public class Client implements RMI_Interface{
   private MulticastSocket mdrsocket;
   private int id;
 
-  public int saySomething() { 
-    System.out.println("Something!!"); 
-    return 0; 
-  } 
- 
-  public int rmiRequest(String type, String message) throws IOException { 
-    switch(type){ 
-      case "Backup": 
-        sendMDBMessage(message, id); 
-        break; 
-      case "Restore": 
-        sendMDRMessage(message, id); 
-        break; 
-      default: 
-        sendMCMessage(message, id); 
-    } 
-    return 0; 
-  } 
- 
-  public Client() {} 
- 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, int whynot) throws UnknownHostException, InterruptedException, IOException { 
-    this.mc_addr = mc_addr; 
-    this.mc_port = mc_port; 
-    this.mdb_addr = mdb_addr; 
-    this.mdb_port = mdb_port; 
-    this.mdr_addr = mdr_addr; 
-    this.mdr_port = mdr_port; 
-    this.id = id; 
- 
-    this.mcaddr = InetAddress.getByName(this.mc_addr); 
-    this.mcsocket = new MulticastSocket(this.mc_port); 
-    this.mcsocket.setTimeToLive(1); 
-    this.mdbaddr = InetAddress.getByName(this.mdb_addr); 
-    this.mdbsocket = new MulticastSocket(this.mdb_port); 
-    this.mdbsocket.setTimeToLive(1); 
-    this.mdraddr = InetAddress.getByName(this.mdr_addr); 
-    this.mdrsocket = new MulticastSocket(this.mdr_port); 
-    this.mdrsocket.setTimeToLive(1); 
-  } 
+  public int saySomething() {
+    System.out.println("Something!!");
+    return 0;
+  }
+
+  public int rmiRequest(String type, String message) throws IOException {
+    switch(type){
+      case "Backup":
+        sendMDBMessage(message, id);
+        break;
+      case "Restore":
+        sendMDRMessage(message, id);
+        break;
+      default:
+        sendMCMessage(message, id);
+    }
+    return 0;
+  }
+
+  public Client() {}
+
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, int whynot) throws UnknownHostException, InterruptedException, IOException {
+    this.mc_addr = mc_addr;
+    this.mc_port = mc_port;
+    this.mdb_addr = mdb_addr;
+    this.mdb_port = mdb_port;
+    this.mdr_addr = mdr_addr;
+    this.mdr_port = mdr_port;
+    this.id = id;
+
+    this.mcaddr = InetAddress.getByName(this.mc_addr);
+    this.mcsocket = new MulticastSocket(this.mc_port);
+    this.mcsocket.setTimeToLive(1);
+    this.mdbaddr = InetAddress.getByName(this.mdb_addr);
+    this.mdbsocket = new MulticastSocket(this.mdb_port);
+    this.mdbsocket.setTimeToLive(1);
+    this.mdraddr = InetAddress.getByName(this.mdr_addr);
+    this.mdrsocket = new MulticastSocket(this.mdr_port);
+    this.mdrsocket.setTimeToLive(1);
+  }
 
   public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port) throws UnknownHostException, InterruptedException, IOException{
     this.mc_addr = mc_addr;
@@ -71,7 +71,7 @@ public class Client implements RMI_Interface{
     this.mdb_port = mdb_port;
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
-    this.id = id; 
+    this.id = id;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -83,17 +83,17 @@ public class Client implements RMI_Interface{
     this.mdrsocket = new MulticastSocket(this.mdr_port);
     this.mdrsocket.setTimeToLive(1);
 
-    System.out.println("Client ID : " + id); 
-    try{ 
-      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, 0); 
-      RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0); 
- 
-      Registry registry = LocateRegistry.getRegistry(); 
-      registry.bind("RMI_Interface" + id, stub); 
-    }catch(Exception e){ 
-      System.err.println("Server exception: " + e.toString()); 
-      e.printStackTrace(); 
-    } 
+    System.out.println("Client ID : " + id);
+    try{
+      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, 0);
+      RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0);
+
+      Registry registry = LocateRegistry.getRegistry();
+      registry.bind("RMI_Interface" + id, stub);
+    }catch(Exception e){
+      System.err.println("Server exception: " + e.toString());
+      e.printStackTrace();
+    }
   }
 
   public void sendMulticastMessage(int senderid) throws IOException{
@@ -125,15 +125,17 @@ public class Client implements RMI_Interface{
     int read = file_input_stream.read(file_bytes,0,n_bytes);
     file_input_stream.close();
 
-    //String mdbmessage = new String(message +"::"+ senderid+"::");
-    //byte[] header = mdbmessage.getBytes();
-    //byte[] full_msg = new byte[header.length + n_bytes];
-    //System.arraycopy(header,0,full_msg,0,header.length);
-    //System.arraycopy(file_bytes,0, full_msg, header.length, file_bytes.length);
-    //System.out.println(full_msg.length);
-    DatagramPacket packet = new DatagramPacket(file_bytes, n_bytes,mdbaddr,mdb_port);
-    mdbsocket.send(packet);
+    char[] CRLF = {0xD,0xA,0xD,0xA};
+    String crlf = new String(CRLF);
+    String mdbmessage = new String("PUTCHUNK:" + senderid+crlf);
+    byte[] header = mdbmessage.getBytes();
+    byte[] full_msg = new byte[header.length + n_bytes];
+    System.arraycopy(header,0,full_msg,0,header.length);
+    System.arraycopy(file_bytes,0, full_msg, header.length, file_bytes.length);
+    System.out.println(full_msg.length);
 
+    DatagramPacket packet = new DatagramPacket(full_msg,full_msg.length,mdbaddr,mdb_port);
+    mdbsocket.send(packet);
   }
 
   public void sendMDRMessage(String message, int senderid)throws IOException{
