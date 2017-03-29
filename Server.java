@@ -43,7 +43,7 @@ public class Server{
   }
 
   public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException{
-    String directory = new String("Peer"+this.server_id+"/receive.png");
+    String directory = new String("Peer"+this.server_id+"/test.png");
     FileOutputStream fos = new FileOutputStream(directory);
     fos.write(receive_bytes);
     fos.close();
