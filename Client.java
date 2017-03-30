@@ -120,27 +120,22 @@ public class Client implements RMI_Interface{
     File input_file = new File("icon_test.png");
     FileInputStream file_input_stream = new FileInputStream(input_file);
     int n_bytes = (int) input_file.length();
-    System.out.println("File size: "+n_bytes);
     byte[] file_bytes = new byte[n_bytes];
     int read = file_input_stream.read(file_bytes,0,n_bytes);
     file_input_stream.close();
 
-    char[] CRLF = {0xD,0xA,0xD,0xA};
-    String crlf = new String(CRLF);
-    String mdbmessage = new String("PUTCHUNK:" + senderid+crlf);
-    byte[] header = mdbmessage.getBytes();
-    byte[] full_msg = new byte[header.length + n_bytes];
-    System.arraycopy(header,0,full_msg,0,header.length);
-    System.arraycopy(file_bytes,0, full_msg, header.length, file_bytes.length);
-    System.out.println(full_msg.length);
+    Message msg = new Message(Message.MsgType.PUTCHUNK, senderid);
+    byte[] full_msg = msg.createMessage(file_bytes);
 
     DatagramPacket packet = new DatagramPacket(full_msg,full_msg.length,mdbaddr,mdb_port);
     mdbsocket.send(packet);
   }
 
   public void sendMDRMessage(String message, int senderid)throws IOException{
-    String mdrmessage = new String(message +":"+ senderid);
-    DatagramPacket packet = new DatagramPacket(mdrmessage.getBytes(), mdrmessage.length(),mdraddr,mdr_port);
+    Message msg = new Message(Message.MsgType.RESTORE,senderid);
+    byte[] body = new byte[0];
+    byte[] full_msg = msg.createMessage(body);
+    DatagramPacket packet = new DatagramPacket(full_msg, full_msg.length,mdraddr,mdr_port);
     mdrsocket.send(packet);
   }
 

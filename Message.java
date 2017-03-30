@@ -2,10 +2,12 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.nio.*;
+import java.util.regex.*;
 
 public class Message{
-  private final char[] CRLF = {0xD,0xA,0xD,0xA};
-  private String messageType;
+  public final char[] CRLF = {0xD,0xA,0xD,0xA};
+  public enum MsgType{PUTCHUNK, RESTORE};
+  private MsgType messageType;
   private int version;
   private int senderid;
   private String fileId;
@@ -13,19 +15,31 @@ public class Message{
   private int replicationDeg;
   private byte[] body;
 
+  public Message(MsgType msgtype, int senderID){
+    this.messageType = msgtype;
+    this.senderid = senderID;
+  }
+
   public Message(byte[] msgdata){
     String crlf = new String(CRLF);
     List<byte[]> headerNBody = split(crlf.getBytes(),msgdata);
 
-    /*String rawmsg = new String(headerNBody.get(0));
-    String[] msg_split = rawmsg.split(":");
-    this.messageType = msg_split[0];
-    this.senderid = Integer.parseInt(msg_split[1]);*/
+    //Extracts Header Info
+    String header = new String(headerNBody.get(0));
+    Pattern pattern = Pattern.compile("\\s+");
+    String[] split_header = pattern.split(header);
 
+    if(split_header[0].equals("PUTCHUNK")){
+      this.messageType = MsgType.PUTCHUNK;
+    }else if(split_header[0].equals("RESTORE")){
+      this.messageType = MsgType.RESTORE;
+    }
+    this.senderid = Integer.parseInt(split_header[1]);
+
+    //Deletes all NULL positions from the received data and saves the content in the body
     byte[] rawbody = headerNBody.get(1);
     int i = rawbody.length;
     while (i-- > 0 && rawbody[i] == '\00') {}
-
     this.body = new byte[i+1];
     System.arraycopy(rawbody, 0,this.body, 0, i+1);
   }
@@ -54,8 +68,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
     l.add(Arrays.copyOfRange(input, blockStart, input.length ));
     return l;
 }
-
-  public String getMessageType(){
+  public MsgType getMessageType(){
     return this.messageType;
   }
   public int getVersion(){
@@ -75,6 +88,32 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
   }
   public byte[] getBody(){
     return this.body;
+  }
+
+  public byte[] createMessage(byte[] body){
+    String crlf = new String(CRLF);
+    //Chooses correct header for message type
+    String header_type = new String("Error");
+    if(this.messageType == MsgType.PUTCHUNK){
+      header_type = new String("PUTCHUNK");
+    }else if(this.messageType == MsgType.RESTORE){
+      header_type = new String("RESTORE");
+    }else{
+      System.out.println("HEADER Error");
+      System.exit(1);
+    }
+    //Builds Header
+    String headermessage = new String(header_type +" "+ senderid+crlf);
+    byte[] header = headermessage.getBytes();
+    byte[] full_msg = new byte[header.length + body.length];
+    if(body.length != 0){
+      System.arraycopy(header,0,full_msg,0,header.length);
+      System.arraycopy(body,0, full_msg, header.length, body.length);
+    }else{
+      System.arraycopy(header,0,full_msg,0,header.length);
+    }
+
+    return full_msg;
   }
 
 }

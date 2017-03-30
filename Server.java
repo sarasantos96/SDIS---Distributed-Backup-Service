@@ -89,7 +89,7 @@ public class Server{
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mdbsocket.receive(packet);
           Message msg = new Message(packet.getData());
-          if(server_id != 3){
+          if(server_id != msg.getsenderid()){
             System.out.println("MDB message: "+ "backup");
             saveChunck(msg.getBody());
           }
@@ -112,15 +112,11 @@ public class Server{
           byte[] buf = new byte[254];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mdrsocket.receive(packet);
-          String msg = new String(packet.getData());
-          msg.trim();
-          String [] rcv = msg.split(":");
-          String message = new String(rcv[0].trim());
-          int senderid = Integer.parseInt(rcv[1].trim());
-          if(senderid != server_id)
-            System.out.println("MDR message: "+message);
+          Message msg = new Message(packet.getData());
+          if(server_id != msg.getsenderid()){
+            System.out.println("MDR message: "+ "restore");
+          }
         }
-
       }catch(Exception e){
         System.out.println("Exception caught");
       }
