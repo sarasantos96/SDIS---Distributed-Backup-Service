@@ -19,11 +19,9 @@ public class Ft{
 		//exp1(); //read file line by line
 		//exp2(); //read and print file metadata
 		
-		Vector<byte[]> ret;
-		ret = splitFile();
-		saveSplitFiles(ret);
-		joinFiles();
-		
+		//splitFile();
+		//joinFiles();
+		listFiles("/home/dalugoga/Desktop/FEUP_3.2/SDIS/Trabalho_1/SDIS---Distributed-Backup-Service/test");
 		/*
 		
 		*/
@@ -54,9 +52,7 @@ public class Ft{
 
 	}
 
-	public static Vector<byte[]> splitFile(){
-		Vector<byte[]> parts = new Vector<byte[]>();
-
+	public static void splitFile(){
 		File input_file = new File(INPUT_FILE_NAME);
 		FileInputStream file_input_stream;
 		long file_size = input_file.length();
@@ -72,7 +68,7 @@ public class Ft{
 				read = file_input_stream.read(byte_chunk, 0, n_bytes);
 				file_size = file_size - read;
 				n_chunks++;
-				parts.addElement(byte_chunk);
+				saveSplitFile(byte_chunk, n_chunks);
 				byte_chunk = null;
 			}
 			file_input_stream.close();
@@ -81,30 +77,28 @@ public class Ft{
 			e.printStackTrace(new PrintStream(System.out));
 		}
 
-		System.out.println(parts.size());
-		return parts;
+		System.out.println("Number of chunks created: " + n_chunks);
 
 	}
 
-	public static void saveSplitFiles(Vector<byte[]> parts)throws IOException{
+	public static void saveSplitFile(byte[] part, int chunk_number)throws IOException{
 		String hashed = createHashedName();
 		String new_file_name;
 		FileOutputStream file_output_stream;
 
-		for(int i = 0; i < parts.size(); i++){
-			new_file_name = hashed + "_part_" + (i + 1) + ".chunk";
-			try{
-				file_output_stream = new FileOutputStream(new File(new_file_name));
-				file_output_stream.write(parts.elementAt(i));
-				file_output_stream.flush();
-				file_output_stream.close();
-				file_output_stream = null;
-				
-			}catch(Exception e){
-				System.out.println(e.getClass().getSimpleName());
-				e.printStackTrace(new PrintStream(System.out));
-			}			
-		}
+		
+		new_file_name = hashed + "_part_" + chunk_number + ".chunk";
+		try{
+			file_output_stream = new FileOutputStream(new File(new_file_name));
+			file_output_stream.write(part);
+			file_output_stream.flush();
+			file_output_stream.close();
+			file_output_stream = null;
+			
+		}catch(Exception e){
+			System.out.println(e.getClass().getSimpleName());
+			e.printStackTrace(new PrintStream(System.out));
+		}			
 	}
 
 	public static void joinFiles() throws IOException{
@@ -170,5 +164,22 @@ public class Ft{
 		s = hash(s); 
 		System.out.println(s);
 		return s;
+	}
+
+	public static void listFiles(String path){
+		File folder = new File(path);
+		File[] listOfFiles = folder.listFiles();
+		long len_sum = 0;
+
+		for(int i = 0; i < listOfFiles.length; i++){
+			if(listOfFiles[i].isFile()){
+				long len = listOfFiles[i].length();
+				String name = listOfFiles[i].getName();
+				len_sum += len;
+				System.out.println(name + " - " + len + "bytes");
+			}
+		}
+
+		System.out.println("Total size - " + len_sum);
 	}
 }
