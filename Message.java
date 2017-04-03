@@ -68,6 +68,8 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
     l.add(Arrays.copyOfRange(input, blockStart, input.length ));
     return l;
 }
+
+
   public MsgType getMessageType(){
     return this.messageType;
   }
