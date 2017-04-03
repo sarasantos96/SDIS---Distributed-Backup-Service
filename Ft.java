@@ -19,11 +19,11 @@ public class Ft{
 		//exp1(); //read file line by line
 		//exp2(); //read and print file metadata
 		
-		//splitFile();
-		//joinFiles();
+		splitFile();
+		joinFiles();
 		
-		String path = new String("/home/dalugoga/Desktop/FEUP_3.2/SDIS/Trabalho_1/SDIS---Distributed-Backup-Service/test");
-		freeSpace(path, 200000);
+		//String path = new String("/home/dalugoga/Desktop/FEUP_3.2/SDIS/Trabalho_1/SDIS---Distributed-Backup-Service/test");
+		//freeSpace(path, 200000);
 
 		
 	}
