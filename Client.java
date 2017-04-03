@@ -194,7 +194,6 @@ public class Client implements RMI_Interface{
     System.out.println("Ficheiro guardado");*/
   }
 
-<<<<<<< HEAD
   public static String hash(String text){
     try{
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -209,6 +208,7 @@ public class Client implements RMI_Interface{
     }
 
   }
+
   public static String createName(String name) throws IOException{
     Path path = Paths.get(name);
     BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
@@ -219,14 +219,16 @@ public class Client implements RMI_Interface{
     //System.out.println(string_to_hash);
     return string_to_hash;
   }
+
   public static String createHashedName(String name) throws IOException{
     String s = createName(name);
     s = hash(s);
     return s;
-=======
+  }
+
   public static HashMap<String, Long> listFiles(File[] listOfFiles){
     HashMap<String, Long> file_map = new HashMap<String, Long>();
-    
+
     for(int i = 0; i < listOfFiles.length; i++){
       if(listOfFiles[i].isFile()){
         long len = listOfFiles[i].length();
@@ -241,7 +243,7 @@ public class Client implements RMI_Interface{
     Set set = map.entrySet();
     Iterator iterator = set.iterator();
     long len_sum = 0;
-    
+
     while(iterator.hasNext()) {
         Map.Entry mentry  = (Map.Entry)iterator.next();
         len_sum = len_sum + (long) mentry.getValue();
@@ -264,7 +266,6 @@ public class Client implements RMI_Interface{
       map = listFiles(listOfFiles);
       space = calculateTotalSpace(map);
     }
->>>>>>> master
   }
 
 }
