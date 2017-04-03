@@ -2,6 +2,9 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.nio.*;
+import java.io.File;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 public class Server{
   private String mc_addr;
@@ -20,8 +23,9 @@ public class Server{
   private MCThread mcthread;
   private MDBThread mdbthread;
   private MDRThread mdrthread;
+  private ExecutorService peerExecutor;
 
-  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port) throws IOException{
+  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor) throws IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -29,6 +33,7 @@ public class Server{
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
     this.server_id = serverid;
+    this.peerExecutor = peerExecutor;
 
     //Threads
     this.mcthread = new MCThread();
@@ -40,13 +45,6 @@ public class Server{
     this.mcthread.start();
     this.mdbthread.start();
     this.mdrthread.start();
-  }
-
-  public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException{
-    String directory = new String("Peer"+this.server_id+"/test.png");
-    FileOutputStream fos = new FileOutputStream(directory);
-    fos.write(receive_bytes);
-    fos.close();
   }
 
   private class MCThread extends Thread {
@@ -91,7 +89,8 @@ public class Server{
           Message msg = new Message(packet.getData());
           if(server_id != msg.getsenderid()){
             System.out.println("MDB message: "+ "backup");
-            saveChunck(msg.getBody());
+            Runnable task = new BackupTask(msg,server_id);
+            peerExecutor.execute(task);
           }
         }
       }catch(Exception e){
@@ -109,16 +108,33 @@ public class Server{
         mdrsocket.joinGroup(mdr_inetAddr);
 
         while(true){
+          System.out.println("begin");
           byte[] buf = new byte[254];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mdrsocket.receive(packet);
           Message msg = new Message(packet.getData());
           if(server_id != msg.getsenderid()){
             System.out.println("MDR message: "+ "restore");
+
+            //TODO: código repetido
+            /*File input_file = new File("./Peer"+server_id+"/r_test.txt");
+            if(input_file.exists() && !input_file.isDirectory()){
+              System.out.println("ei");
+              FileInputStream file_input_stream = new FileInputStream(input_file);
+              int n_bytes = (int) input_file.length();
+              byte[] file_bytes = new byte[n_bytes];
+              int read = file_input_stream.read(file_bytes,0,n_bytes);
+              file_input_stream.close();
+              System.out.println(new String(file_bytes));
+              packet = new DatagramPacket(file_bytes,file_bytes.length,mdr_inetAddr,mdr_port);
+              mdrsocket.send(packet);
+              Thread.sleep(400);
+            }*/
           }
         }
       }catch(Exception e){
-        System.out.println("Exception caught");
+        System.err.println("Server exception: " + e.toString());
+        e.printStackTrace();
       }
     }
   }

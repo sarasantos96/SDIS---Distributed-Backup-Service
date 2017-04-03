@@ -131,12 +131,35 @@ public class Client implements RMI_Interface{
     mdbsocket.send(packet);
   }
 
-  public void sendMDRMessage(String message, int senderid)throws IOException{
+  //TODO: código repetido (Server.java)
+  public void saveChunck(byte[] receive_bytes,int server_id) throws FileNotFoundException, IOException{
+    String directory = new String("Peer"+server_id+"/restore_test.txt");
+    FileOutputStream fos = new FileOutputStream(directory);
+    fos.write(receive_bytes);
+    fos.close();
+  }
+
+  public void sendMDRMessage(String message, int senderid)throws IOException, FileNotFoundException{
     Message msg = new Message(Message.MsgType.RESTORE,senderid);
     byte[] body = new byte[0];
     byte[] full_msg = msg.createMessage(body);
+
     DatagramPacket packet = new DatagramPacket(full_msg, full_msg.length,mdraddr,mdr_port);
     mdrsocket.send(packet);
+
+    //Waits to receive and saves file
+  /*  System.out.println("Waiting file");
+    byte[] buf = new byte[254];
+    packet = new DatagramPacket(buf, buf.length);
+    mdrsocket.receive(packet);
+    //TODO: código repetido (Message.java)
+    byte[] rawbody = packet.getData();
+    int i = rawbody.length;
+    while (i-- > 0 && rawbody[i] == '\00') {}
+    byte[] receive_body = new byte[i+1];
+    System.arraycopy(rawbody, 0,receive_body, 0, i+1);
+    saveChunck(body,senderid);
+    System.out.println("Ficheiro guardado");*/
   }
 
 }
