@@ -42,6 +42,14 @@ public class Client implements RMI_Interface{
       case "Restore":
         sendMDRMessage(message, id);
         break;
+      case "Reclaim":
+        String current_path = new java.io.File( "." ).getCanonicalPath();
+        boolean isNumeric = message.matches("-?\\d+(\\.\\d+)?");
+        if(isNumeric)
+          reclaimStorage(current_path + "/Peer" + id, Integer.parseInt(message));
+        else
+          return -1;
+        break;
       default:
         sendMCMessage(message, id);
     }
@@ -95,10 +103,9 @@ public class Client implements RMI_Interface{
       RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0);
 
       Registry registry = LocateRegistry.getRegistry();
-      registry.bind("RMI_Interface" + id, stub);
+      registry.rebind("RMI_Interface" + id, stub);
     }catch(Exception e){
-      System.err.println("Server exception: " + e.toString());
-      e.printStackTrace();
+      System.err.println("RMI NOT RUNNING EXCEPTION!!!");
     }
   }
 
@@ -187,6 +194,7 @@ public class Client implements RMI_Interface{
     System.out.println("Ficheiro guardado");*/
   }
 
+<<<<<<< HEAD
   public static String hash(String text){
     try{
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -215,6 +223,48 @@ public class Client implements RMI_Interface{
     String s = createName(name);
     s = hash(s);
     return s;
+=======
+  public static HashMap<String, Long> listFiles(File[] listOfFiles){
+    HashMap<String, Long> file_map = new HashMap<String, Long>();
+    
+    for(int i = 0; i < listOfFiles.length; i++){
+      if(listOfFiles[i].isFile()){
+        long len = listOfFiles[i].length();
+        String name = listOfFiles[i].getName();
+        file_map.put(name, len);
+      }
+    }
+    return file_map;
+  }
+
+  public static long calculateTotalSpace(HashMap<String, Long> map){
+    Set set = map.entrySet();
+    Iterator iterator = set.iterator();
+    long len_sum = 0;
+    
+    while(iterator.hasNext()) {
+        Map.Entry mentry  = (Map.Entry)iterator.next();
+        len_sum = len_sum + (long) mentry.getValue();
+      }
+
+      return len_sum;
+  }
+
+  public static void reclaimStorage(String path, long target_space){
+    File folder = new File(path);
+    File[] listOfFiles = folder.listFiles();
+
+    HashMap<String, Long> map = listFiles(listOfFiles);
+    long space = calculateTotalSpace(map);
+
+    while(space > target_space){
+      listOfFiles[0].delete();
+      System.out.println("Deleted file " + listOfFiles[0].getName());
+      listOfFiles = folder.listFiles();
+      map = listFiles(listOfFiles);
+      space = calculateTotalSpace(map);
+    }
+>>>>>>> master
   }
 
 }

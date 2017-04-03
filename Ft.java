@@ -20,6 +20,7 @@ public class Ft{
 	public static void main(String[] args)throws IOException{
 		//exp1(); //read file line by line
 		//exp2(); //read and print file metadata
+<<<<<<< HEAD
 
 		//splitFile();
 		//joinFiles();
@@ -27,6 +28,16 @@ public class Ft{
 		/*
 
 		*/
+=======
+		
+		splitFile();
+		joinFiles();
+		
+		//String path = new String("/home/dalugoga/Desktop/FEUP_3.2/SDIS/Trabalho_1/SDIS---Distributed-Backup-Service/test");
+		//freeSpace(path, 200000);
+
+		
+>>>>>>> master
 	}
 
 	public static void exp1(){
@@ -168,20 +179,62 @@ public class Ft{
 		return s;
 	}
 
-	public static void listFiles(String path){
-		File folder = new File(path);
-		File[] listOfFiles = folder.listFiles();
-		long len_sum = 0;
-
+	public static HashMap<String, Long> listFiles(File[] listOfFiles){
+		HashMap<String, Long> file_map = new HashMap<String, Long>();
+		
 		for(int i = 0; i < listOfFiles.length; i++){
 			if(listOfFiles[i].isFile()){
 				long len = listOfFiles[i].length();
 				String name = listOfFiles[i].getName();
-				len_sum += len;
-				System.out.println(name + " - " + len + "bytes");
+				file_map.put(name, len);
 			}
 		}
-
-		System.out.println("Total size - " + len_sum);
+		return file_map;
 	}
+<<<<<<< HEAD
 }
+=======
+
+	public static void printDatabase(HashMap<String, Long> map){
+    	Set set = map.entrySet();
+	    Iterator iterator = set.iterator();
+	    
+	    while(iterator.hasNext()) {
+	        Map.Entry mentry  = (Map.Entry)iterator.next();
+	        System.out.print("key is: "+ mentry.getKey() + " & Value is: ");
+	        System.out.println(mentry.getValue());
+      	}
+
+      	System.out.println("");
+    }
+
+    public static long calculateTotalSpace(HashMap<String, Long> map){
+    	Set set = map.entrySet();
+	    Iterator iterator = set.iterator();
+	    long len_sum = 0;
+	    
+	    while(iterator.hasNext()) {
+	        Map.Entry mentry  = (Map.Entry)iterator.next();
+	        len_sum = len_sum + (long) mentry.getValue();
+      	}
+
+      	return len_sum;
+    }
+
+    public static void freeSpace(String path, long target_space){
+    	File folder = new File(path);
+		File[] listOfFiles = folder.listFiles();
+
+		HashMap<String, Long> map = listFiles(listOfFiles);
+		long space = calculateTotalSpace(map);
+
+		while(space > target_space){
+			listOfFiles[0].delete();
+			System.out.println("Deleted file " + listOfFiles[0].getName());
+			listOfFiles = folder.listFiles();
+			map = listFiles(listOfFiles);
+			space = calculateTotalSpace(map);
+		}
+    }
+}
+>>>>>>> master
