@@ -3,6 +3,8 @@ import java.io.*;
 import java.util.*;
 import java.nio.*;
 import java.io.File;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 public class Server{
   private String mc_addr;
@@ -21,8 +23,9 @@ public class Server{
   private MCThread mcthread;
   private MDBThread mdbthread;
   private MDRThread mdrthread;
+  private ExecutorService peerExecutor;
 
-  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port) throws IOException{
+  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor) throws IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -30,6 +33,7 @@ public class Server{
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
     this.server_id = serverid;
+    this.peerExecutor = peerExecutor;
 
     //Threads
     this.mcthread = new MCThread();
@@ -41,13 +45,6 @@ public class Server{
     this.mcthread.start();
     this.mdbthread.start();
     this.mdrthread.start();
-  }
-
-  public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException{
-    String directory = new String("Peer"+this.server_id+"/test.png");
-    FileOutputStream fos = new FileOutputStream(directory);
-    fos.write(receive_bytes);
-    fos.close();
   }
 
   private class MCThread extends Thread {
@@ -92,7 +89,8 @@ public class Server{
           Message msg = new Message(packet.getData());
           if(server_id != msg.getsenderid()){
             System.out.println("MDB message: "+ "backup");
-            saveChunck(msg.getBody());
+            Runnable task = new BackupTask(msg,server_id);
+            peerExecutor.execute(task);
           }
         }
       }catch(Exception e){

@@ -1,6 +1,9 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+
 
 
 public class Peer{
@@ -15,6 +18,8 @@ public class Peer{
   private int serverid;
   private ServerThread thread;
 
+  public ExecutorService executor;
+
 
   public Peer(int server_id,String mc_addr, int mc_port,String mdb_addr, int mdb_port,String mdr_addr, int mdr_port) throws UnknownHostException, IOException, InterruptedException{
     this.serverid = server_id;
@@ -24,8 +29,11 @@ public class Peer{
     this.mdb_port = mdb_port;
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
+
+    executor = Executors.newFixedThreadPool(4);
+
     this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
-    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
+    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor);
     this.thread = new ServerThread();
     this.thread.start();
 
