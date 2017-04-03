@@ -2,12 +2,23 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.nio.*;
+import java.io.BufferedReader;
+import java.nio.file.*;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
+import javax.xml.bind.DatatypeConverter;
+import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.*;
+
 
 public class Client implements RMI_Interface{
+  public static final int CHUNCK_SIZE = 64000;
+
   //Multicast
   private String mc_addr;
   private int mc_port;
@@ -23,15 +34,10 @@ public class Client implements RMI_Interface{
   private MulticastSocket mdrsocket;
   private int id;
 
-  public int saySomething() {
-    System.out.println("Something!!");
-    return 0;
-  }
-
   public int rmiRequest(String type, String message) throws IOException {
     switch(type){
       case "Backup":
-        sendMDBMessage(message, id);
+        processBackup(message,id);
         break;
       case "Restore":
         sendMDRMessage(message, id);
@@ -96,19 +102,50 @@ public class Client implements RMI_Interface{
     }
   }
 
-  public void sendMulticastMessage(int senderid) throws IOException{
+  public void processBackup(String message,int id){
+    //Message terá depois tmb o repDeg
+    String filepath = message;
+		File input_file = new File(filepath);
+
+		FileInputStream file_input_stream;
+		long file_size = input_file.length();
+		int read = 0, n_bytes = CHUNCK_SIZE;
+		byte[] byte_chunk;
+    int n_chunks = 0;
+
+		try{
+			file_input_stream = new FileInputStream(input_file);
+			while(file_size > 0){
+				if(file_size <= CHUNCK_SIZE)
+					n_bytes = (int) file_size;
+				byte_chunk = new byte[n_bytes];
+				read = file_input_stream.read(byte_chunk, 0, n_bytes);
+				file_size = file_size - read;
+				n_chunks++;
+        String fileId = createHashedName(filepath)+"_part_"+n_chunks;
+				sendMDBMessage(byte_chunk, id, fileId);
+				byte_chunk = null;
+			}
+			file_input_stream.close();
+		}catch(Exception e){
+			System.out.println(e.getClass().getSimpleName());
+			e.printStackTrace(new PrintStream(System.out));
+		}
+  }
+
+  /*public void sendMulticastMessage(int senderid) throws IOException{
     System.out.println("Write something: ");
     String input = System.console().readLine();
 
     String[]  inputType = input.split(" ");
     if(inputType[0].equals("backup")){
-      sendMDBMessage("backup", senderid);
+      sendMDBMessage("backup", senderid, inputType[1]);
     }else if(inputType[0].equals("restore")){
       sendMDRMessage("restore",senderid);
     }else{
       sendMCMessage(inputType[0],senderid);
     }
-  }
+  }*/
 
   public void sendMCMessage(String message, int senderid) throws IOException{
     String mcmessage = new String(message +":"+ senderid);
@@ -116,27 +153,15 @@ public class Client implements RMI_Interface{
     mcsocket.send(packet);
   }
 
-  public void sendMDBMessage(String message, int senderid) throws IOException{
-    File input_file = new File("icon_test.png");
-    FileInputStream file_input_stream = new FileInputStream(input_file);
-    int n_bytes = (int) input_file.length();
-    byte[] file_bytes = new byte[n_bytes];
-    int read = file_input_stream.read(file_bytes,0,n_bytes);
-    file_input_stream.close();
+  public void sendMDBMessage(byte[] body, int senderid, String filename) throws IOException{
 
-    Message msg = new Message(Message.MsgType.PUTCHUNK, senderid);
-    byte[] full_msg = msg.createMessage(file_bytes);
+      Message msg = new Message(Message.MsgType.PUTCHUNK, senderid);
+      msg.setFileID(filename);
+      System.out.println(msg.getFileId());
+      byte[] full_msg = msg.createMessage(body);
 
-    DatagramPacket packet = new DatagramPacket(full_msg,full_msg.length,mdbaddr,mdb_port);
-    mdbsocket.send(packet);
-  }
-
-  //TODO: código repetido (Server.java)
-  public void saveChunck(byte[] receive_bytes,int server_id) throws FileNotFoundException, IOException{
-    String directory = new String("Peer"+server_id+"/restore_test.txt");
-    FileOutputStream fos = new FileOutputStream(directory);
-    fos.write(receive_bytes);
-    fos.close();
+      DatagramPacket packet = new DatagramPacket(full_msg,full_msg.length,mdbaddr,mdb_port);
+      mdbsocket.send(packet);
   }
 
   public void sendMDRMessage(String message, int senderid)throws IOException, FileNotFoundException{
@@ -160,6 +185,36 @@ public class Client implements RMI_Interface{
     System.arraycopy(rawbody, 0,receive_body, 0, i+1);
     saveChunck(body,senderid);
     System.out.println("Ficheiro guardado");*/
+  }
+
+  public static String hash(String text){
+    try{
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hash = digest.digest(text.getBytes(StandardCharsets.UTF_8));
+      String s = DatatypeConverter.printHexBinary(hash);
+      //System.out.println(s);
+      return s;
+    }catch(Exception e){
+      System.out.println(e.getClass().getSimpleName());
+      e.printStackTrace(new PrintStream(System.out));
+      return null;
+    }
+
+  }
+  public static String createName(String name) throws IOException{
+    Path path = Paths.get(name);
+    BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+    long size = attr.size();
+    FileTime modified_date = attr.lastModifiedTime();
+
+    String string_to_hash = name + size + modified_date;
+    //System.out.println(string_to_hash);
+    return string_to_hash;
+  }
+  public static String createHashedName(String name) throws IOException{
+    String s = createName(name);
+    s = hash(s);
+    return s;
   }
 
 }

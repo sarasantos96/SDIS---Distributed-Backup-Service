@@ -20,6 +20,7 @@ public class Message{
     this.senderid = senderID;
   }
 
+  //<MessageType> <Version> <SenderID> <FileId> <ChunkNo> <RepDeg> <CRLF><CRLF> <Body>
   public Message(byte[] msgdata){
     String crlf = new String(CRLF);
     List<byte[]> headerNBody = split(crlf.getBytes(),msgdata);
@@ -34,7 +35,10 @@ public class Message{
     }else if(split_header[0].equals("RESTORE")){
       this.messageType = MsgType.RESTORE;
     }
+
     this.senderid = Integer.parseInt(split_header[1]);
+    this.fileId = split_header[2];
+
 
     //Deletes all NULL positions from the received data and saves the content in the body
     byte[] rawbody = headerNBody.get(1);
@@ -92,6 +96,10 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
     return this.body;
   }
 
+  public void setFileID(String fileID){
+    this.fileId = fileID;
+  }
+
   public byte[] createMessage(byte[] body){
     String crlf = new String(CRLF);
     //Chooses correct header for message type
@@ -105,7 +113,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
       System.exit(1);
     }
     //Builds Header
-    String headermessage = new String(header_type +" "+ senderid+crlf);
+    String headermessage = new String(header_type +" "+senderid+" "+fileId+crlf);
     byte[] header = headermessage.getBytes();
     byte[] full_msg = new byte[header.length + body.length];
     if(body.length != 0){

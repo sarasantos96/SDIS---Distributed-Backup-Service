@@ -15,15 +15,17 @@ public class Ft{
 	public static final int CHUNCK_SIZE = 64000;
 	public static int n_chunks = 0;
 
+	public Ft(){}
+
 	public static void main(String[] args)throws IOException{
 		//exp1(); //read file line by line
 		//exp2(); //read and print file metadata
-		
+
 		//splitFile();
 		//joinFiles();
 		listFiles("/home/dalugoga/Desktop/FEUP_3.2/SDIS/Trabalho_1/SDIS---Distributed-Backup-Service/test");
 		/*
-		
+
 		*/
 	}
 
@@ -86,7 +88,7 @@ public class Ft{
 		String new_file_name;
 		FileOutputStream file_output_stream;
 
-		
+
 		new_file_name = hashed + "_part_" + chunk_number + ".chunk";
 		try{
 			file_output_stream = new FileOutputStream(new File(new_file_name));
@@ -94,11 +96,11 @@ public class Ft{
 			file_output_stream.flush();
 			file_output_stream.close();
 			file_output_stream = null;
-			
+
 		}catch(Exception e){
 			System.out.println(e.getClass().getSimpleName());
 			e.printStackTrace(new PrintStream(System.out));
-		}			
+		}
 	}
 
 	public static void joinFiles() throws IOException{
@@ -133,7 +135,7 @@ public class Ft{
 	}
 
 	public static String hash(String text){
-		
+
 		try{
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 			byte[] hash = digest.digest(text.getBytes(StandardCharsets.UTF_8));
@@ -160,8 +162,8 @@ public class Ft{
 	}
 
 	public static String createHashedName() throws IOException{
-		String s = createName(); 
-		s = hash(s); 
+		String s = createName();
+		s = hash(s);
 		System.out.println(s);
 		return s;
 	}

@@ -19,7 +19,8 @@ class BackupTask implements Runnable
     }
 
     public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException{
-      String directory = new String("Peer"+this.server_id+"/test.png");
+      System.out.println(this.message.getFileId());
+      String directory = new String("Peer"+this.server_id+ "/"+this.message.getFileId());
       FileOutputStream fos = new FileOutputStream(directory);
       fos.write(receive_bytes);
       fos.close();
@@ -32,7 +33,7 @@ class BackupTask implements Runnable
         {
           saveChunck(message.getBody());
         }
-        catch (Exception e)
+        catch(Exception e)
         {
           System.err.println("Server exception: " + e.toString());
           e.printStackTrace();
