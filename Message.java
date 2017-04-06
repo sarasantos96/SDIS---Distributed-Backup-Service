@@ -6,7 +6,7 @@ import java.util.regex.*;
 
 public class Message{
   public final char[] CRLF = {0xD,0xA,0xD,0xA};
-  public enum MsgType{PUTCHUNK, RESTORE};
+  public enum MsgType{PUTCHUNK, RESTORE,STORED};
   private MsgType messageType;
   private int version;
   private int senderid;
@@ -38,6 +38,7 @@ public class Message{
 
     this.senderid = Integer.parseInt(split_header[1]);
     this.fileId = split_header[2];
+    this.chunkNo = Integer.parseInt(split_header[3]);
 
 
     //Deletes all NULL positions from the received data and saves the content in the body
@@ -100,7 +101,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
     this.fileId = fileID;
   }
 
-  public byte[] createMessage(byte[] body){
+  public byte[] createMessage(byte[] body,int chunckNo){
     String crlf = new String(CRLF);
     //Chooses correct header for message type
     String header_type = new String("Error");
@@ -113,7 +114,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
       System.exit(1);
     }
     //Builds Header
-    String headermessage = new String(header_type +" "+senderid+" "+fileId+crlf);
+    String headermessage = new String(header_type +" "+senderid+" "+fileId+" "+chunckNo + crlf);
     byte[] header = headermessage.getBytes();
     byte[] full_msg = new byte[header.length + body.length];
     if(body.length != 0){
@@ -124,6 +125,12 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
     }
 
     return full_msg;
+  }
+
+  public byte[] createStoredMessage(int chunckNo){
+      String crlf = new String(CRLF);
+      String msg = new String("STORED "+ this.senderid +" "+ this.fileId + " "+chunckNo + crlf);
+      return msg.getBytes();
   }
 
 }

@@ -61,12 +61,13 @@ public class Server{
           mcsocket.receive(packet);
           String msg = new String(packet.getData());
           //msg.trim();
-          String [] rcv = msg.split(":");
+          /*String [] rcv = msg.split(":");
           String message = new String(rcv[0].trim());
           int senderid = Integer.parseInt(rcv[1].trim());
           if(senderid != server_id){
             System.out.println("MC message: "+message);
-          }
+          }*/
+          System.out.println(msg);
         }
       }catch(Exception e){
         System.out.println(e.getClass().getSimpleName());
@@ -89,7 +90,7 @@ public class Server{
           Message msg = new Message(packet.getData());
           if(server_id != msg.getsenderid()){
             System.out.println("MDB message: "+ "backup");
-            Runnable task = new BackupTask(msg,server_id);
+            Runnable task = new BackupTask(msg,server_id,mcsocket,mc_inetAddr,mc_port);
             peerExecutor.execute(task);
           }
         }
