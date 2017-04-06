@@ -32,8 +32,8 @@ public class Message{
 
     if(split_header[0].equals("PUTCHUNK")){
       this.messageType = MsgType.PUTCHUNK;
-    }else if(split_header[0].equals("RESTORE")){
-      this.messageType = MsgType.RESTORE;
+    }else if(split_header[0].equals("STORED")){
+      this.messageType = MsgType.STORED;
     }
 
     this.senderid = Integer.parseInt(split_header[1]);
@@ -42,11 +42,13 @@ public class Message{
 
 
     //Deletes all NULL positions from the received data and saves the content in the body
-    byte[] rawbody = headerNBody.get(1);
-    int i = rawbody.length;
-    while (i-- > 0 && rawbody[i] == '\00') {}
-    this.body = new byte[i+1];
-    System.arraycopy(rawbody, 0,this.body, 0, i+1);
+    if(headerNBody.size() > 1){
+      byte[] rawbody = headerNBody.get(1);
+      int i = rawbody.length;
+      while (i-- > 0 && rawbody[i] == '\00') {}
+      this.body = new byte[i+1];
+      System.arraycopy(rawbody, 0,this.body, 0, i+1);
+    }    
   }
 
 /* Code to split byte[] when a pattern occurs

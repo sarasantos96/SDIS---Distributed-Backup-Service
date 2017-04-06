@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.Date;
 
 class BackupTask implements Runnable
 {
@@ -31,12 +32,15 @@ class BackupTask implements Runnable
       fos.close();
     }
 
-    public void sendStoredMessage() throws IOException{
+    public void sendStoredMessage() throws IOException, InterruptedException{
       Message stored = new Message(Message.MsgType.STORED,this.server_id);
       stored.setFileID(this.message.getFileId());
       byte[] stored_msg = stored.createStoredMessage(message.getChunkNo());
 
       DatagramPacket packet = new DatagramPacket(stored_msg,stored_msg.length,this.mc_inetAddr,this.mc_port);
+      Random r = new Random();
+      int wait = r.nextInt(400);
+      Thread.sleep(wait);
       this.mcsocket.send(packet);
 
     }
@@ -51,7 +55,6 @@ class BackupTask implements Runnable
         }
         catch(Exception e)
         {
-          System.out.println("oi");
           System.err.println("Server exception: " + e.toString());
           e.printStackTrace();
         }
