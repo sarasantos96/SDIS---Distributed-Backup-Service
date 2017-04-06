@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.nio.*;
 import java.util.regex.*;
 
-public class ControlMessage{
+public class RestoreControlMessage{
 	public final char[] CRLF = {0xD,0xA,0xD,0xA};
 	public enum MsgType{GETCHUNK};
 	private MsgType messageType;
@@ -15,7 +15,7 @@ public class ControlMessage{
   private int chunkNo;
 
 	//GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-  public ControlMessage(MsgType msgtype, int version, int senderID, String fileID, int chunkNo){
+  public RestoreControlMessage(MsgType msgtype, int version, int senderID, String fileID, int chunkNo){
   	this.messageType = msgtype;
   	this.version = version;
   	this.senderid = senderID;
@@ -23,7 +23,7 @@ public class ControlMessage{
   	this.chunkNo = chunkNo;
  	}
 
- 	public ControlMessage(byte[] msgdata){
+ 	public RestoreControlMessage(byte[] msgdata){
 	 	String crlf = new String(CRLF);
 	  List<byte[]> headerNBody = split(crlf.getBytes(),msgdata);
 
