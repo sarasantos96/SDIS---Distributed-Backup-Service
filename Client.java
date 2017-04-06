@@ -130,7 +130,7 @@ public class Client implements RMI_Interface{
 				file_size = file_size - read;
 				n_chunks++;
         String fileId = createHashedName(filepath)+"_part_"+n_chunks;
-				sendMDBMessage(byte_chunk, id, fileId);
+				sendMDBMessage(byte_chunk, id, fileId,n_chunks);
 				byte_chunk = null;
 			}
 			file_input_stream.close();
@@ -160,12 +160,11 @@ public class Client implements RMI_Interface{
     mcsocket.send(packet);
   }
 
-  public void sendMDBMessage(byte[] body, int senderid, String filename) throws IOException{
+  public void sendMDBMessage(byte[] body, int senderid, String filename, int chunkNo) throws IOException{
 
       Message msg = new Message(Message.MsgType.PUTCHUNK, senderid);
       msg.setFileID(filename);
-      System.out.println(msg.getFileId());
-      byte[] full_msg = msg.createMessage(body);
+      byte[] full_msg = msg.createMessage(body,chunkNo);
 
       DatagramPacket packet = new DatagramPacket(full_msg,full_msg.length,mdbaddr,mdb_port);
       mdbsocket.send(packet);
@@ -174,7 +173,7 @@ public class Client implements RMI_Interface{
   public void sendMDRMessage(String message, int senderid)throws IOException, FileNotFoundException{
     Message msg = new Message(Message.MsgType.RESTORE,senderid);
     byte[] body = new byte[0];
-    byte[] full_msg = msg.createMessage(body);
+    byte[] full_msg = msg.createMessage(body,1); //!!!!
 
     DatagramPacket packet = new DatagramPacket(full_msg, full_msg.length,mdraddr,mdr_port);
     mdrsocket.send(packet);
@@ -199,7 +198,6 @@ public class Client implements RMI_Interface{
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
       byte[] hash = digest.digest(text.getBytes(StandardCharsets.UTF_8));
       String s = DatatypeConverter.printHexBinary(hash);
-      //System.out.println(s);
       return s;
     }catch(Exception e){
       System.out.println(e.getClass().getSimpleName());
@@ -216,7 +214,6 @@ public class Client implements RMI_Interface{
     FileTime modified_date = attr.lastModifiedTime();
 
     String string_to_hash = name + size + modified_date;
-    //System.out.println(string_to_hash);
     return string_to_hash;
   }
 
