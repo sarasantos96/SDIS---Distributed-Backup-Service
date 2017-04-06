@@ -59,15 +59,9 @@ public class Server{
           byte[] buf = new byte[1000];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mcsocket.receive(packet);
-          String msg = new String(packet.getData());
-          //msg.trim();
-          /*String [] rcv = msg.split(":");
-          String message = new String(rcv[0].trim());
-          int senderid = Integer.parseInt(rcv[1].trim());
-          if(senderid != server_id){
-            System.out.println("MC message: "+message);
-          }*/
-          System.out.println(msg);
+          Message message = new Message(packet.getData());
+          if(message.getsenderid() != server_id)
+            System.out.println("STORED");
         }
       }catch(Exception e){
         System.out.println(e.getClass().getSimpleName());
