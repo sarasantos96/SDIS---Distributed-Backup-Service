@@ -92,4 +92,16 @@ public class RestoreControlMessage{
 		System.out.println("fileid: " + this.fileid);
 		System.out.println("chunkNo: " + this.chunkNo);
 	}
+
+  public int getSenderId(){
+    return this.senderid;
+  }
+
+  public String getFileId(){
+    return this.fileid;
+  }
+
+  public int getChunkNo(){
+    return this.chunkNo;
+  }
 }
