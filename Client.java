@@ -152,9 +152,8 @@ public class Client implements RMI_Interface{
 		}
   }
 
-  public void sendMCMessage(String message, int senderid) throws IOException{
-    String mcmessage = new String(message +":"+ senderid);
-    DatagramPacket packet = new DatagramPacket(mcmessage.getBytes(),mcmessage.length(),mcaddr,mc_port);
+  public void sendMCMessage(byte[] bytes) throws IOException{
+    DatagramPacket packet = new DatagramPacket(bytes,bytes.length,mcaddr,mc_port);
     mcsocket.send(packet);
   }
 
