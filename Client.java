@@ -130,9 +130,19 @@ public class Client implements RMI_Interface{
 				file_size = file_size - read;
 				n_chunks++;
         String fileId = createHashedName(filename)+"_part_"+n_chunks;
-        ReplicationControl c = new ReplicationControl("oi.txt");
-        //this.control.addNewLog(fileId,replicationDeg,0);
+        this.control.addNewLog(filename,fileId,replicationDeg,0);
 				sendMDBMessage(byte_chunk, id, fileId,n_chunks);
+
+        boolean continues = true;
+        int tries = 0;
+        while(continues && tries < 5){
+          if(this.control.getAtualRepDeg(fileId) < this.control.getRepDeg(fileId))
+            sendMDBMessage(byte_chunk, id, fileId,n_chunks);
+          else
+            continues = false;
+
+          tries++;
+        }
 				byte_chunk = null;
 			}
 			file_input_stream.close();
