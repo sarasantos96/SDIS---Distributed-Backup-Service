@@ -35,10 +35,10 @@ public class Client implements RMI_Interface{
   private int id;
   private ReplicationControl control;
 
-  public int rmiRequest(String type, String arg1, String args2) throws IOException {
+  public int rmiRequest(String type, String arg1, String arg2) throws IOException {
     switch(type){
       case "Backup":
-        processBackup(arg1,id);
+        processBackup(arg1,2,id);
         break;
       case "Restore":
         processRestore(arg1);
@@ -59,7 +59,7 @@ public class Client implements RMI_Interface{
 
   public Client() {}
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, int whynot) throws UnknownHostException, InterruptedException, IOException {
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port,ReplicationControl control, int whynot) throws UnknownHostException, InterruptedException, IOException {
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -88,6 +88,7 @@ public class Client implements RMI_Interface{
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
     this.id = id;
+    this.control = control;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -101,7 +102,7 @@ public class Client implements RMI_Interface{
 
     System.out.println("Peer ID : " + id);
     try{
-      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, 0);
+      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, control, 0);
       RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0);
 
       Registry registry = LocateRegistry.getRegistry();
@@ -111,10 +112,8 @@ public class Client implements RMI_Interface{
     }
   }
 
-  public void processBackup(String message,int id){
-    String filepath = message;
-		File input_file = new File(filepath);
-
+  public void processBackup(String filename,int replicationDeg,int id){
+		File input_file = new File(filename);
 		FileInputStream file_input_stream;
 		long file_size = input_file.length();
 		int read = 0, n_bytes = CHUNCK_SIZE;
@@ -130,7 +129,9 @@ public class Client implements RMI_Interface{
 				read = file_input_stream.read(byte_chunk, 0, n_bytes);
 				file_size = file_size - read;
 				n_chunks++;
-        String fileId = createHashedName(filepath)+"_part_"+n_chunks;
+        String fileId = createHashedName(filename)+"_part_"+n_chunks;
+        ReplicationControl c = new ReplicationControl("oi.txt");
+        //this.control.addNewLog(fileId,replicationDeg,0);
 				sendMDBMessage(byte_chunk, id, fileId,n_chunks);
 				byte_chunk = null;
 			}
@@ -141,22 +142,9 @@ public class Client implements RMI_Interface{
 		}
   }
 
-  /*public void sendMulticastMessage(int senderid) throws IOException{
-    System.out.println("Write something: ");
-    String input = System.console().readLine();
-
-    String[]  inputType = input.split(" ");
-    if(inputType[0].equals("backup")){
-      sendMDBMessage("backup", senderid, inputType[1]);
-    }else if(inputType[0].equals("restore")){
-      sendMDRMessage("restore",senderid);
-    }else{
-      sendMCMessage(inputType[0],senderid);
-    }
-  }*/
-
-  public void sendMCMessage(byte[] bytes) throws IOException{
-    DatagramPacket packet = new DatagramPacket(bytes, bytes.length,mcaddr,mc_port);
+  public void sendMCMessage(String message, int senderid) throws IOException{
+    String mcmessage = new String(message +":"+ senderid);
+    DatagramPacket packet = new DatagramPacket(mcmessage.getBytes(),mcmessage.length(),mcaddr,mc_port);
     mcsocket.send(packet);
   }
 
