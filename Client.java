@@ -33,6 +33,7 @@ public class Client implements RMI_Interface{
   private InetAddress mdraddr;
   private MulticastSocket mdrsocket;
   private int id;
+  private ReplicationControl control;
 
   public int rmiRequest(String type, String message) throws IOException {
     switch(type){
@@ -66,6 +67,7 @@ public class Client implements RMI_Interface{
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
     this.id = id;
+    this.control = control;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -78,7 +80,7 @@ public class Client implements RMI_Interface{
     this.mdrsocket.setTimeToLive(1);
   }
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port) throws UnknownHostException, InterruptedException, IOException{
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control) throws UnknownHostException, InterruptedException, IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -97,7 +99,7 @@ public class Client implements RMI_Interface{
     this.mdrsocket = new MulticastSocket(this.mdr_port);
     this.mdrsocket.setTimeToLive(1);
 
-    System.out.println("Client ID : " + id);
+    System.out.println("Peer ID : " + id);
     try{
       Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, 0);
       RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0);
@@ -105,12 +107,11 @@ public class Client implements RMI_Interface{
       Registry registry = LocateRegistry.getRegistry();
       registry.rebind("RMI_Interface" + id, stub);
     }catch(Exception e){
-      System.err.println("RMI NOT RUNNING EXCEPTION!!!");
+      System.err.println("RMI not Running!");
     }
   }
 
   public void processBackup(String message,int id){
-    //Message terá depois tmb o repDeg
     String filepath = message;
 		File input_file = new File(filepath);
 

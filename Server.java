@@ -24,8 +24,9 @@ public class Server{
   private MDBThread mdbthread;
   private MDRThread mdrthread;
   private ExecutorService peerExecutor;
+  private ReplicationControl control;
 
-  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor) throws IOException{
+  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor, ReplicationControl control) throws IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -34,6 +35,7 @@ public class Server{
     this.mdr_port = mdr_port;
     this.server_id = serverid;
     this.peerExecutor = peerExecutor;
+    this.control = control;
 
     //Threads
     this.mcthread = new MCThread();

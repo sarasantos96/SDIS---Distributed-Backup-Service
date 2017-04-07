@@ -19,6 +19,7 @@ public class Peer{
   private ServerThread thread;
 
   public ExecutorService executor;
+  public ReplicationControl control;
 
 
   public Peer(int server_id,String mc_addr, int mc_port,String mdb_addr, int mdb_port,String mdr_addr, int mdr_port) throws UnknownHostException, IOException, InterruptedException{
@@ -30,17 +31,20 @@ public class Peer{
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
 
+    //Initiate Thread Pool
     executor = Executors.newFixedThreadPool(4);
-
-    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port);
-    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor);
-    this.thread = new ServerThread();
-    this.thread.start();
 
     //Initialize folder for peer
     String folder_name = new String("./Peer" + this.serverid);
     boolean create_folder = (new File(folder_name)).mkdirs();
 
+    String logfilename = new String(folder_name +"/"+"logfile.txt");
+    control = new ReplicationControl(logfilename);
+
+    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, control);
+    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,control);
+    this.thread = new ServerThread();
+    this.thread.start();
   }
 
   //java Peer <protocol version> <server id> <access point> <MC> <MDB> <MDR>
