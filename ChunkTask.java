@@ -25,20 +25,30 @@ class ChunkTask implements Runnable
         this.mc_port = mc_port;
     }
 
-    public boolean checkFile(){
+    public File checkFile(){
       File file = new File("Peer" + this.server_id + "/" + this.message.getFileId() + "_part_" + this.message.getChunkNo());
       if(file.exists() && !file.isDirectory())
-        return true;
+        return file;
       else
-        return false;
+        return null;
     }
 
-    public void sendStoredMessage() throws IOException, InterruptedException{
-      Message stored = new Message(Message.MsgType.STORED,this.server_id);
-      stored.setFileID(this.message.getFileId());
-      byte[] stored_msg = stored.createStoredMessage(message.getChunkNo());
+    public byte[] getChunkBytes(File file) throws FileNotFoundException, IOException{
+      long file_size = file.length();
+      FileInputStream file_input_stream = new FileInputStream(file);
+      byte[] byte_chunk = new byte[(int) file_size];
+      file_input_stream.read(byte_chunk, 0, (int) file_size);
+      System.out.println(byte_chunk.length);
 
-      DatagramPacket packet = new DatagramPacket(stored_msg,stored_msg.length,this.mc_inetAddr,this.mc_port);
+      return byte_chunk;
+    }
+
+    public void sendChunkMessage(byte[] bytes) throws IOException, InterruptedException{
+      RestoreMessage rm = new RestoreMessage(RestoreMessage.MsgType.CHUNK, 1, this.server_id, this.message.getFileId(), this.message.getChunkNo());
+
+      byte[] rm_bytes = rm.createMessage(bytes);
+
+      DatagramPacket packet = new DatagramPacket(rm_bytes,rm_bytes.length,this.mc_inetAddr,this.mc_port);
       Random r = new Random();
       int wait = r.nextInt(400);
       Thread.sleep(wait);
@@ -51,15 +61,23 @@ class ChunkTask implements Runnable
     {
         try
         {
-          if(checkFile())
-            System.out.println("SIM");
-          else
-            System.out.println("NAO");
+          File file = checkFile();
+          
+          if(file != null){
+            System.out.println("OIOI");
+            byte[] bytes = getChunkBytes(file);
+            sendChunkMessage(bytes);
+          }
+          else{
+            return;
+          }
+            
         }
         catch(Exception e)
         {
           System.err.println("Server exception: " + e.toString());
           e.printStackTrace();
         }
+          
     }
 }

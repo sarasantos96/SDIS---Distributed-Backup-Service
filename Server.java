@@ -72,7 +72,7 @@ public class Server{
             RestoreControlMessage message = new RestoreControlMessage(packet.getData());
             if(message.getSenderId() != server_id){
               message.print();
-              Runnable task = new ChunkTask(message,server_id,mcsocket,mc_inetAddr,mc_port);
+              Runnable task = new ChunkTask(message,server_id,mdrsocket,mdr_inetAddr,mdr_port);
               peerExecutor.execute(task);
             }
           }
@@ -127,13 +127,17 @@ public class Server{
 
         while(true){
           System.out.println("begin");
-          byte[] buf = new byte[254];
+          byte[] buf = new byte[80000];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mdrsocket.receive(packet);
+          System.out.println(packet.getData().length);
+          System.out.println(new String(packet.getData()));
+          return;
+          /*
           Message msg = new Message(packet.getData());
           if(server_id != msg.getsenderid()){
             System.out.println("MDR message: "+ "restore");
-
+*/
             //TODO: código repetido
             /*File input_file = new File("./Peer"+server_id+"/r_test.txt");
             if(input_file.exists() && !input_file.isDirectory()){
@@ -147,8 +151,8 @@ public class Server{
               packet = new DatagramPacket(file_bytes,file_bytes.length,mdr_inetAddr,mdr_port);
               mdrsocket.send(packet);
               Thread.sleep(400);
-            }*/
-          }
+            }*//*
+          }*/
         }
       }catch(Exception e){
         System.err.println("Server exception: " + e.toString());
