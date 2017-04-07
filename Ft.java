@@ -8,6 +8,9 @@ import java.util.*;
 import java.security.MessageDigest;
 import java.nio.charset.StandardCharsets;
 import javax.xml.bind.DatatypeConverter;
+import java.util.Arrays;
+
+
 
 public class Ft{
 	public static final String INPUT_FILE_NAME = "pic.jpg";
@@ -24,12 +27,18 @@ public class Ft{
 		
 		//String path = new String("/home/dalugoga/Desktop/FEUP_3.2/SDIS/Trabalho_1/SDIS---Distributed-Backup-Service/test");
 		//freeSpace(path, 200000);
-
-		ControlMessage cm = new ControlMessage(ControlMessage.MsgType.GETCHUNK, 1, 2, "JAKSHFOAHFIAIDHFIADHFIADF", 5);
+		/*
+		RestoreControlMessage cm = new RestoreControlMessage(RestoreControlMessage.MsgType.GETCHUNK, 1, 2, "JAKSHFOAHFIAIDHFIADHFIADF", 5);
 		cm.print();
-		ControlMessage cm2 = new ControlMessage(cm.createMessage());
+		RestoreControlMessage cm2 = new RestoreControlMessage(cm.createMessage());
 		cm2.print();
+		*/
 
+		RestoreMessage rm = new RestoreMessage(RestoreMessage.MsgType.CHUNK, 1, 2, "JAHDFJKDAHFJKAFHA", 3);
+		byte[] bytes = rm.createMessage(new String("shfjskdhfskfashfgsahfgs ashfjshdg asdhfg").getBytes());
+		System.out.println(new String(bytes));
+		RestoreMessage rm2 = new RestoreMessage(bytes);
+		rm2.print();
 		
 	}
 

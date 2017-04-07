@@ -35,24 +35,24 @@ public class Client implements RMI_Interface{
   private int id;
   private ReplicationControl control;
 
-  public int rmiRequest(String type, String message) throws IOException {
+  public int rmiRequest(String type, String arg1, String args2) throws IOException {
     switch(type){
       case "Backup":
-        processBackup(message,id);
+        processBackup(arg1,id);
         break;
       case "Restore":
-        sendMDRMessage(message, id);
+        sendMDRMessage(arg1, id);
         break;
       case "Reclaim":
         String current_path = new java.io.File( "." ).getCanonicalPath();
-        boolean isNumeric = message.matches("-?\\d+(\\.\\d+)?");
+        boolean isNumeric = arg1.matches("-?\\d+(\\.\\d+)?");
         if(isNumeric)
-          reclaimStorage(current_path + "/Peer" + id, Integer.parseInt(message));
+          reclaimStorage(current_path + "/Peer" + id, Integer.parseInt(arg1));
         else
           return -1;
         break;
       default:
-        sendMCMessage(message, id);
+        sendMCMessage(arg1, id);
     }
     return 0;
   }
