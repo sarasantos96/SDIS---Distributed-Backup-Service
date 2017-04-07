@@ -6,10 +6,10 @@ import java.nio.*;
 
 public class ReplicationControl{
   private String logFileName;
-  private HashMap<String, int[]> hmap;
+  private HashMap<String,Value> hmap;
 
   public ReplicationControl(String logFileName) throws IOException{
-    this.hmap = new HashMap<String, int[]>();
+    this.hmap = new HashMap<String, Value>();
     this.logFileName = logFileName;
     File logFile = new File(logFileName);
     if(!logFile.exists())
@@ -19,8 +19,21 @@ public class ReplicationControl{
 
   }
 
-  public void addNewLog(String chunkname, int replicationDeg, int atualReplicationDeg) throws IOException{
-    int [] value = {replicationDeg, atualReplicationDeg};
+  public class Value{
+    public String filename;
+    public int replicationDeg;
+    public int atualReplicationDeg;
+
+    public Value(String filename, int replicationDeg, int atualReplicationDeg){
+      this.filename = filename;
+      this.replicationDeg = replicationDeg;
+      this.atualReplicationDeg = atualReplicationDeg;
+    }
+
+  }
+
+  public void addNewLog(String filename,String chunkname, int replicationDeg, int atualReplicationDeg) throws IOException{
+    Value value = new Value(filename,replicationDeg, atualReplicationDeg);
     this.hmap.put(chunkname,value);
     this.saveHmap();
   }
@@ -35,9 +48,10 @@ public class ReplicationControl{
 			while ((line = bufferedReader.readLine()) != null) {
 				String [] split = line.split(":");
         String chunkname = split[0];
-        int replicationDeg = Integer.parseInt(split[1]);
-        int atualReplicationDeg = Integer.parseInt(split[2]);
-        this.addNewLog(chunkname,replicationDeg,atualReplicationDeg);
+        String filename = split[1];
+        int replicationDeg = Integer.parseInt(split[2]);
+        int atualReplicationDeg = Integer.parseInt(split[3]);
+        this.addNewLog(filename,chunkname,replicationDeg,atualReplicationDeg);
 			}
 			fileReader.close();
 		} catch (IOException e) {
@@ -47,11 +61,12 @@ public class ReplicationControl{
 
   public void saveHmap() throws IOException{
     String content = new String("");
-    for(Map.Entry<String, int[]> entry: this.hmap.entrySet()) {
+    for(Map.Entry<String, Value> entry: this.hmap.entrySet()) {
         String chunkname = entry.getKey();
-        int replicationDeg = entry.getValue()[0];
-        int atualReplicationDeg = entry.getValue()[1];
-        content += chunkname+":"+replicationDeg+":"+atualReplicationDeg+"\n";
+        String filename = entry.getValue().filename;
+        int replicationDeg = entry.getValue().replicationDeg;
+        int atualReplicationDeg = entry.getValue().atualReplicationDeg;
+        content += chunkname+":"+filename+":"+replicationDeg+":"+atualReplicationDeg+"\n";
 
     }
     byte data[] = content.trim().getBytes();
@@ -61,21 +76,20 @@ public class ReplicationControl{
   }
 
   public void updateRepDeg(String chunckname) throws IOException{
-    int [] oldvalue = this.hmap.get(chunckname);
-    int [] newvalue = {oldvalue[0],oldvalue[1]+1};
-    this.addNewLog(chunckname,newvalue[0],newvalue[1]);
+    Value oldvalue = this.hmap.get(chunckname);
+    this.addNewLog(oldvalue.filename,chunckname,oldvalue.replicationDeg,oldvalue.atualReplicationDeg + 1);
   }
 
   public int getRepDeg(String chunckname){
-    return this.hmap.get(chunckname)[0];
+    return this.hmap.get(chunckname).replicationDeg;
   }
 
   public int getAtualRepDeg(String chunckname){
-    return this.hmap.get(chunckname)[1];
+    return this.hmap.get(chunckname).atualReplicationDeg;
   }
 
   public boolean isChunkOwner(String chunckname){
-    int [] value = this.hmap.get(chunckname);
+    Value value = this.hmap.get(chunckname);
 
     if(value != null)
       return true;

@@ -39,10 +39,10 @@ public class Peer{
     boolean create_folder = (new File(folder_name)).mkdirs();
 
     String logfilename = new String(folder_name +"/"+"logfile.txt");
-    control = new ReplicationControl(logfilename);
+    this.control = new ReplicationControl(logfilename);
 
-    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, control);
-    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,control);
+    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, this.control);
+    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,this.control);
     this.thread = new ServerThread();
     this.thread.start();
   }
