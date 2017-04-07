@@ -41,7 +41,7 @@ public class Client implements RMI_Interface{
         processBackup(arg1,id);
         break;
       case "Restore":
-        sendMDRMessage(arg1, id);
+        processRestore(arg1);
         break;
       case "Reclaim":
         String current_path = new java.io.File( "." ).getCanonicalPath();
@@ -51,8 +51,8 @@ public class Client implements RMI_Interface{
         else
           return -1;
         break;
-      default:
-        sendMCMessage(arg1, id);
+      /*default:
+        sendMCMessage(arg1, id);*/
     }
     return 0;
   }
@@ -155,9 +155,8 @@ public class Client implements RMI_Interface{
     }
   }*/
 
-  public void sendMCMessage(String message, int senderid) throws IOException{
-    String mcmessage = new String(message +":"+ senderid);
-    DatagramPacket packet = new DatagramPacket(mcmessage.getBytes(),mcmessage.length(),mcaddr,mc_port);
+  public void sendMCMessage(byte[] bytes) throws IOException{
+    DatagramPacket packet = new DatagramPacket(bytes, bytes.length,mcaddr,mc_port);
     mcsocket.send(packet);
   }
 
@@ -264,6 +263,16 @@ public class Client implements RMI_Interface{
       map = listFiles(listOfFiles);
       space = calculateTotalSpace(map);
     }
+  }
+
+  public void processRestore(String arg1) throws IOException{
+    //arg1 = file name
+    String fileid = "2AE060C9AAB5D2D5C2AE49B117ADDBF1E36FDC5FB49A576FB30EA4954D73F37C";
+    int chunk_number = 1;
+    int version = 1;
+    RestoreControlMessage cm = new RestoreControlMessage(RestoreControlMessage.MsgType.GETCHUNK, version, this.id, fileid, 1);
+    byte[] bytes = cm.createMessage();
+    sendMCMessage(bytes);
   }
 
 }

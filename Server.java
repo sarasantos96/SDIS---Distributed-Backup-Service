@@ -61,14 +61,35 @@ public class Server{
           byte[] buf = new byte[1000];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mcsocket.receive(packet);
-          Message message = new Message(packet.getData());
-          if(message.getsenderid() != server_id)
-            System.out.println("STORED");
+          String type = getControlType(packet);
+          
+          if(type.equals("STORED")){
+            Message message = new Message(packet.getData());
+            if(message.getsenderid() != server_id)
+              System.out.println("STORED");
+          }
+          if(type.equals("GETCHUNK")){
+            RestoreControlMessage message = new RestoreControlMessage(packet.getData());
+            if(message.getSenderId() != server_id){
+              message.print();
+              Runnable task = new ChunkTask(message,server_id,mcsocket,mc_inetAddr,mc_port);
+              peerExecutor.execute(task);
+            }
+          }
         }
       }catch(Exception e){
         System.out.println(e.getClass().getSimpleName());
       }
     }
+  }
+
+  public static String getControlType(DatagramPacket packet){
+    byte[] bytes = packet.getData();
+    String text = new String(bytes);
+
+    String[] parts = text.split(" ");
+    System.out.println(parts[0]);
+    return parts[0];
   }
 
   private class MDBThread extends Thread{
