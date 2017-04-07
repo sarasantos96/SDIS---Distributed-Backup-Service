@@ -38,7 +38,7 @@ public class Client implements RMI_Interface{
   public int rmiRequest(String type, String arg1, String arg2) throws IOException {
     switch(type){
       case "Backup":
-        processBackup(arg1,2,id);
+        processBackup(arg1,Integer.parseInt(arg2),id);
         break;
       case "Restore":
         processRestore(arg1);
@@ -129,14 +129,16 @@ public class Client implements RMI_Interface{
 				read = file_input_stream.read(byte_chunk, 0, n_bytes);
 				file_size = file_size - read;
 				n_chunks++;
-        String fileId = createHashedName(filename)+"_part_"+n_chunks;
-        this.control.addNewLog(filename,fileId,replicationDeg,0);
+        String fileId = createHashedName(filename);
+        String chunkname = fileId + "_"+n_chunks;
+        this.control.addNewLog(filename,chunkname,replicationDeg,0);
 				sendMDBMessage(byte_chunk, id, fileId,n_chunks);
 
         boolean continues = true;
         int tries = 0;
         while(continues && tries < 5){
-          if(this.control.getAtualRepDeg(fileId) < this.control.getRepDeg(fileId))
+          Thread.sleep(1000);
+          if(this.control.getAtualRepDeg(chunkname) < this.control.getRepDeg(chunkname))
             sendMDBMessage(byte_chunk, id, fileId,n_chunks);
           else
             continues = false;
