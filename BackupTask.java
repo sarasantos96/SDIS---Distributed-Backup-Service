@@ -25,11 +25,15 @@ class BackupTask implements Runnable
         this.mc_port = mc_port;
     }
 
-    public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException{
-      String directory = new String("Peer"+this.server_id+ "/"+this.message.getFileId());
-      FileOutputStream fos = new FileOutputStream(directory);
-      fos.write(receive_bytes);
-      fos.close();
+    public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException, InterruptedException{
+      String directory = new String("Peer"+this.server_id+ "/"+this.message.getFileId()+"_"+this.message.getChunkNo());
+      File file = new File(directory);
+      if(!file.exists()){
+        FileOutputStream fos = new FileOutputStream(directory);
+        fos.write(receive_bytes);
+        fos.close();
+        sendStoredMessage();
+      }
     }
 
     public void sendStoredMessage() throws IOException, InterruptedException{
@@ -51,7 +55,6 @@ class BackupTask implements Runnable
         try
         {
           saveChunck(message.getBody());
-          sendStoredMessage();
         }
         catch(Exception e)
         {

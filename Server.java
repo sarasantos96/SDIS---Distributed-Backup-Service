@@ -62,11 +62,13 @@ public class Server{
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mcsocket.receive(packet);
           String type = getControlType(packet);
-          
+
           if(type.equals("STORED")){
             Message message = new Message(packet.getData());
-            if(message.getsenderid() != server_id)
-              System.out.println("STORED");
+            if(message.getsenderid() != server_id && control.isChunkOwner(message.getFileId()+"_"+message.getChunkNo())){
+                control.updateRepDeg(message.getFileId()+"_"+message.getChunkNo());
+            }
+
           }
           if(type.equals("GETCHUNK")){
             RestoreControlMessage message = new RestoreControlMessage(packet.getData());
@@ -88,7 +90,6 @@ public class Server{
     String text = new String(bytes);
 
     String[] parts = text.split(" ");
-    System.out.println(parts[0]);
     return parts[0];
   }
 
