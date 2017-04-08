@@ -39,6 +39,7 @@ class BackupTask implements Runnable
     public void sendStoredMessage() throws IOException, InterruptedException{
       Message stored = new Message(Message.MsgType.STORED,this.server_id);
       stored.setFileID(this.message.getFileId());
+      stored.setVersion("1.0");
       byte[] stored_msg = stored.createStoredMessage(message.getChunkNo());
 
       DatagramPacket packet = new DatagramPacket(stored_msg,stored_msg.length,this.mc_inetAddr,this.mc_port);

@@ -35,7 +35,7 @@ public class Client implements RMI_Interface{
   private int id;
   private ReplicationControl control;
 
-  public int rmiRequest(String type, String arg1, String arg2) throws IOException {
+  public int rmiRequest(String type, String arg1, String arg2) throws IOException, InterruptedException {
     switch(type){
       case "Backup":
         processBackup(arg1,Integer.parseInt(arg2),id);
@@ -53,6 +53,9 @@ public class Client implements RMI_Interface{
         break;
       /*default:
         sendMCMessage(arg1, id);*/
+      case "Delete":
+        processDelete(arg1,id);
+        break;
     }
     return 0;
   }
@@ -112,6 +115,20 @@ public class Client implements RMI_Interface{
     }
   }
 
+  public void processDelete(String filename, int id) throws IOException, InterruptedException{
+    String fileId = control.getFileIdByFilename(filename);
+    Message message = new Message(Message.MsgType.DELETE, id);
+    message.setFileID(fileId);
+    byte [] msg = message.createDeleteMessage("1.0");
+    int i = 0;
+    while(i<3){
+      sendMCMessage(msg);
+      Thread.sleep(10);
+      i++;
+    }
+    control.deleteAllEntries(fileId);
+  }
+
   public void processBackup(String filename,int replicationDeg,int id){
 		File input_file = new File(filename);
 		FileInputStream file_input_stream;
@@ -163,6 +180,7 @@ public class Client implements RMI_Interface{
 
       Message msg = new Message(Message.MsgType.PUTCHUNK, senderid);
       msg.setFileID(filename);
+      msg.setVersion("1.0");
       byte[] full_msg = msg.createMessage(body,chunkNo);
 
       DatagramPacket packet = new DatagramPacket(full_msg,full_msg.length,mdbaddr,mdb_port);
