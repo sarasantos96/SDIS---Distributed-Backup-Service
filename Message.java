@@ -6,9 +6,9 @@ import java.util.regex.*;
 
 public class Message{
   public final char[] CRLF = {0xD,0xA,0xD,0xA};
-  public enum MsgType{PUTCHUNK, RESTORE,STORED};
+  public enum MsgType{PUTCHUNK, RESTORE,STORED,DELETE};
   private MsgType messageType;
-  private int version;
+  private String version;
   private int senderid;
   private String fileId;
   private int chunkNo;
@@ -34,11 +34,14 @@ public class Message{
       this.messageType = MsgType.PUTCHUNK;
     }else if(split_header[0].equals("STORED")){
       this.messageType = MsgType.STORED;
+    }else if(split_header[0].equals("DELETE")){
+      this.messageType = MsgType.DELETE;
     }
-
-    this.senderid = Integer.parseInt(split_header[1]);
-    this.fileId = split_header[2];
-    this.chunkNo = Integer.parseInt(split_header[3]);
+    this.version = split_header[1];
+    this.senderid = Integer.parseInt(split_header[2]);
+    this.fileId = split_header[3];
+    if(this.messageType != MsgType.DELETE)
+      this.chunkNo = Integer.parseInt(split_header[4]);
 
 
     //Deletes all NULL positions from the received data and saves the content in the body
@@ -48,7 +51,7 @@ public class Message{
       while (i-- > 0 && rawbody[i] == '\00') {}
       this.body = new byte[i+1];
       System.arraycopy(rawbody, 0,this.body, 0, i+1);
-    }    
+    }
   }
 
 /* Code to split byte[] when a pattern occurs
@@ -80,7 +83,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
   public MsgType getMessageType(){
     return this.messageType;
   }
-  public int getVersion(){
+  public String getVersion(){
     return this.version;
   }
   public int getsenderid(){
@@ -103,6 +106,10 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
     this.fileId = fileID;
   }
 
+  public void setVersion(String version){
+    this.version = version;
+  }
+
   public byte[] createMessage(byte[] body,int chunckNo){
     String crlf = new String(CRLF);
     //Chooses correct header for message type
@@ -116,7 +123,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
       System.exit(1);
     }
     //Builds Header
-    String headermessage = new String(header_type +" "+senderid+" "+fileId+" "+chunckNo + crlf);
+    String headermessage = new String(header_type +" "+version+" "+senderid+" "+fileId+" "+chunckNo + crlf);
     byte[] header = headermessage.getBytes();
     byte[] full_msg = new byte[header.length + body.length];
     if(body.length != 0){
@@ -131,8 +138,14 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
 
   public byte[] createStoredMessage(int chunckNo){
       String crlf = new String(CRLF);
-      String msg = new String("STORED "+ this.senderid +" "+ this.fileId + " "+chunckNo + crlf);
+      String msg = new String("STORED "+this.version + " "+this.senderid +" "+ this.fileId + " "+chunckNo + crlf);
       return msg.getBytes();
+  }
+
+  public byte[] createDeleteMessage(String version){
+    String crlf = new String(CRLF);
+    String msg = new String("DELETE "+version+" "+ this.senderid +" "+ this.fileId + crlf);
+    return msg.getBytes();
   }
 
 }

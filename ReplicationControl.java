@@ -96,4 +96,28 @@ public class ReplicationControl{
 
     return false;
   }
+
+  public void deleteAllEntries(String fileId) throws IOException{
+
+    for(Iterator<Map.Entry<String, Value>> i = this.hmap.entrySet().iterator(); i.hasNext(); ){
+      Map.Entry<String, Value> entry = i.next();
+      String chunkname = entry.getKey();
+      String entryfileId = chunkname.split("_")[0];
+
+      if(entryfileId.equals(fileId)){
+        i.remove();
+      }
+    }
+    saveHmap();
+  }
+
+  public String getFileIdByFilename(String filename){
+    for(Map.Entry<String, Value> entry: this.hmap.entrySet()) {
+        String current_filename = entry.getValue().filename;
+        if(filename.equals(current_filename)){
+          return entry.getKey().split("_")[0];
+        }
+    }
+    return null;
+  }
 }

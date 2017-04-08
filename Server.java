@@ -78,6 +78,13 @@ public class Server{
               peerExecutor.execute(task);
             }
           }
+          if(type.equals("DELETE")){
+            Message deleteMsg = new Message(packet.getData());
+            if(deleteMsg.getsenderid() != server_id){
+              Runnable task = new DeleteTask(deleteMsg.getFileId(),control,server_id);
+              peerExecutor.execute(task);
+            }
+          }
         }
       }catch(Exception e){
         System.out.println(e.getClass().getSimpleName());
