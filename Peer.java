@@ -17,6 +17,7 @@ public class Peer{
   private Server server;
   private int serverid;
   private ServerThread thread;
+  private Long size;
 
   public ExecutorService executor;
   public ReplicationControl control;
@@ -30,6 +31,8 @@ public class Peer{
     this.mdb_port = mdb_port;
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
+    this.size = new Long(50000000);
+
 
     //Initiate Thread Pool
     executor = Executors.newFixedThreadPool(4);
@@ -41,8 +44,8 @@ public class Peer{
     String logfilename = new String(folder_name +"/"+"logfile.txt");
     this.control = new ReplicationControl(logfilename);
 
-    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, this.control);
-    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,this.control);
+    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, this.control,this.size);
+    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,this.control,this.size);
     this.thread = new ServerThread();
     this.thread.start();
   }

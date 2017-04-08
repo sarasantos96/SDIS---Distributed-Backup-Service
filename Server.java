@@ -25,8 +25,9 @@ public class Server{
   private MDRThread mdrthread;
   private ExecutorService peerExecutor;
   private ReplicationControl control;
+  private Long size;
 
-  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor, ReplicationControl control) throws IOException{
+  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor, ReplicationControl control,Long size) throws IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -36,6 +37,7 @@ public class Server{
     this.server_id = serverid;
     this.peerExecutor = peerExecutor;
     this.control = control;
+    this.size = size;
 
     //Threads
     this.mcthread = new MCThread();
@@ -115,7 +117,7 @@ public class Server{
           Message msg = new Message(packet.getData());
           if(server_id != msg.getsenderid()){
             System.out.println("MDB message: "+ "backup");
-            Runnable task = new BackupTask(msg,server_id,mcsocket,mc_inetAddr,mc_port);
+            Runnable task = new BackupTask(msg,server_id,mcsocket,mc_inetAddr,mc_port,size);
             peerExecutor.execute(task);
           }
         }
