@@ -120,4 +120,16 @@ public class ReplicationControl{
     }
     return null;
   }
+
+  public int getNumberOfChunks(String filename){
+    int n_chunks = 0;
+
+    for(Map.Entry<String, Value> entry: this.hmap.entrySet()) {
+        String current_filename = entry.getValue().filename;
+        if(filename.equals(current_filename)){
+          n_chunks++;
+        }
+    }
+    return n_chunks;
+  }
 }
