@@ -46,6 +46,7 @@ public class Message{
 
     if(headerNBody.size() > 1){
       this.body = headerNBody.get(1);
+    }
   }
 
 /* Code to split byte[] when a pattern occurs

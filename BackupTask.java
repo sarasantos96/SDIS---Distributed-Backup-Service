@@ -15,24 +15,38 @@ class BackupTask implements Runnable
     private MulticastSocket mcsocket;
     private InetAddress mc_inetAddr;
     private int mc_port;
+    private Long size;
 
-    public BackupTask(Message message, int server_id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port)
+    public BackupTask(Message message, int server_id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port,Long size)
     {
         this.message = message;
         this.server_id = server_id;
         this.mcsocket = mcsocket;
         this.mc_inetAddr = mc_inetAddr;
         this.mc_port = mc_port;
+        this.size = size;
+    }
+
+    public Long folderSize() {
+        File directory = new File("./Peer"+this.server_id);
+        long length = 0;
+        for (File file : directory.listFiles()) {
+            if (file.isFile())
+                length += file.length();
+        }
+        return new Long(length);
     }
 
     public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException, InterruptedException{
-      String directory = new String("Peer"+this.server_id+ "/"+this.message.getFileId()+"_"+this.message.getChunkNo());
-      File file = new File(directory);
-      if(!file.exists()){
-        FileOutputStream fos = new FileOutputStream(directory);
-        fos.write(receive_bytes);
-        fos.close();
-        sendStoredMessage();
+      if(folderSize() + receive_bytes.length < this.size){
+        String directory = new String("Peer"+this.server_id+ "/"+this.message.getFileId()+"_"+this.message.getChunkNo());
+        File file = new File(directory);
+        if(!file.exists()){
+          FileOutputStream fos = new FileOutputStream(directory);
+          fos.write(receive_bytes);
+          fos.close();
+          sendStoredMessage();
+        }
       }
     }
 

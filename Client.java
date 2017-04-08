@@ -34,6 +34,7 @@ public class Client implements RMI_Interface{
   private MulticastSocket mdrsocket;
   private int id;
   private ReplicationControl control;
+  private Long size;
 
   public int rmiRequest(String type, String arg1, String arg2) throws IOException, InterruptedException {
     switch(type){
@@ -62,7 +63,7 @@ public class Client implements RMI_Interface{
 
   public Client() {}
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port,ReplicationControl control, int whynot) throws UnknownHostException, InterruptedException, IOException {
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port,ReplicationControl control,Long size, int whynot) throws UnknownHostException, InterruptedException, IOException {
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -70,6 +71,7 @@ public class Client implements RMI_Interface{
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
     this.id = id;
+    this.size = size;
     this.control = control;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
@@ -83,7 +85,7 @@ public class Client implements RMI_Interface{
     this.mdrsocket.setTimeToLive(1);
   }
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control) throws UnknownHostException, InterruptedException, IOException{
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control, Long size) throws UnknownHostException, InterruptedException, IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -92,6 +94,7 @@ public class Client implements RMI_Interface{
     this.mdr_port = mdr_port;
     this.id = id;
     this.control = control;
+    this.size = size;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -105,7 +108,7 @@ public class Client implements RMI_Interface{
 
     System.out.println("Peer ID : " + id);
     try{
-      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, control, 0);
+      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, control, size,0);
       RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0);
 
       Registry registry = LocateRegistry.getRegistry();
@@ -266,7 +269,7 @@ public class Client implements RMI_Interface{
       return len_sum;
   }
 
-  public static void reclaimStorage(String path, long target_space){
+  public void reclaimStorage(String path, long target_space){
     File folder = new File(path);
     File[] listOfFiles = folder.listFiles();
 
@@ -280,6 +283,7 @@ public class Client implements RMI_Interface{
       map = listFiles(listOfFiles);
       space = calculateTotalSpace(map);
     }
+    this.size = new Long(target_space);
   }
 
   public void processRestore(String arg1) throws IOException{
