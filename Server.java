@@ -131,9 +131,11 @@ public class Server{
           byte[] buf = new byte[80000];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mdrsocket.receive(packet);
-          System.out.println(packet.getData().length);
-          System.out.println(new String(packet.getData()));
-          return;
+          //System.out.println(packet.getData().length);
+          //System.out.println(new String(packet.getData()));
+          RestoreMessage rm = new RestoreMessage(packet.getData());
+          Runnable task = new SaveRestoreChunkTask(rm,server_id);
+          peerExecutor.execute(task);
           /*
           Message msg = new Message(packet.getData());
           if(server_id != msg.getsenderid()){

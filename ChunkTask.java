@@ -26,7 +26,7 @@ class ChunkTask implements Runnable
     }
 
     public File checkFile(){
-      File file = new File("Peer" + this.server_id + "/" + this.message.getFileId() + "_part_" + this.message.getChunkNo());
+      File file = new File("Peer" + this.server_id + "/" + this.message.getFileId() + "_" + this.message.getChunkNo());
       if(file.exists() && !file.isDirectory())
         return file;
       else
@@ -62,9 +62,9 @@ class ChunkTask implements Runnable
         try
         {
           File file = checkFile();
-          
+          System.out.println("OIOI");
           if(file != null){
-            System.out.println("OIOI");
+            
             byte[] bytes = getChunkBytes(file);
             sendChunkMessage(bytes);
           }
