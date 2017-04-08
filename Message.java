@@ -44,14 +44,8 @@ public class Message{
       this.chunkNo = Integer.parseInt(split_header[4]);
 
 
-    //Deletes all NULL positions from the received data and saves the content in the body
     if(headerNBody.size() > 1){
-      byte[] rawbody = headerNBody.get(1);
-      int i = rawbody.length;
-      while (i-- > 0 && rawbody[i] == '\00') {}
-      this.body = new byte[i+1];
-      System.arraycopy(rawbody, 0,this.body, 0, i+1);
-    }
+      this.body = headerNBody.get(1);
   }
 
 /* Code to split byte[] when a pattern occurs
