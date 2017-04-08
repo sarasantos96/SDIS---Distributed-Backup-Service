@@ -22,8 +22,8 @@ public class Ft{
 		//exp1(); //read file line by line
 		//exp2(); //read and print file metadata
 		
-		//splitFile();
-		//joinFiles();
+		splitFile();
+		joinFiles();
 		
 		//String path = new String("/home/dalugoga/Desktop/FEUP_3.2/SDIS/Trabalho_1/SDIS---Distributed-Backup-Service/test");
 		//freeSpace(path, 200000);
@@ -33,13 +33,13 @@ public class Ft{
 		RestoreControlMessage cm2 = new RestoreControlMessage(cm.createMessage());
 		cm2.print();
 		*/
-
+/*
 		RestoreMessage rm = new RestoreMessage(RestoreMessage.MsgType.CHUNK, 1, 2, "JAHDFJKDAHFJKAFHA", 3);
 		byte[] bytes = rm.createMessage(new String("shfjskdhfskfashfgsahfgs ashfjshdg asdhfg").getBytes());
 		System.out.println(new String(bytes));
 		RestoreMessage rm2 = new RestoreMessage(bytes);
 		rm2.print();
-		
+		*/
 	}
 
 	public static void exp1(){
