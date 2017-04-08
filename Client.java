@@ -289,6 +289,8 @@ public class Client implements RMI_Interface{
   public void processRestore(String arg1) throws IOException{
     //arg1 = file name
     String fileid = "FEB0FD69BDC3F7914F18C8C6FE379B8A0C01F0904DFA12F5DA93953DDEA483B4";
+    String folder_name = new String("./Peer" + this.id + "/tmp/" + fileid);
+    boolean create_folder = (new File(folder_name)).mkdirs();
     int chunk_number = 1;
     int version = 1;
     RestoreControlMessage cm = new RestoreControlMessage(RestoreControlMessage.MsgType.GETCHUNK, version, this.id, fileid, 1);

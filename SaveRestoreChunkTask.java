@@ -13,16 +13,21 @@ class SaveRestoreChunkTask implements Runnable{
     private int server_id;
 
     public SaveRestoreChunkTask(RestoreMessage message, int server_id){
-        this.message = message;
-        this.server_id = server_id;
+      this.message = message;
+      this.server_id = server_id;
+    }
+
+    public boolean checkFolder(){
+      File f = new File("Peer" + this.server_id + "/tmp/" +this.message.getFileId());
+      return (f.exists() && f.isDirectory());
+
     }
 
     public void saveChunkFile() throws FileNotFoundException, IOException, InterruptedException{
-      String directory = new String("Peer"+this.server_id+ "/"+this.message.getFileId()+"/"+this.message.getFileId()+"_"+this.message.getChunkNo());
-      File file = new File(directory);
-      file.getParentFile().mkdir();
+      String file_name = new String("Peer"+this.server_id+ "/tmp/" +this.message.getFileId()+"/"+this.message.getFileId()+"_"+this.message.getChunkNo());
+      File file = new File(file_name);
       if(!file.exists()){
-        FileOutputStream fos = new FileOutputStream(directory);
+        FileOutputStream fos = new FileOutputStream(file);
         fos.write(this.message.getBody());
         fos.close();
       }
@@ -32,8 +37,8 @@ class SaveRestoreChunkTask implements Runnable{
     public void run(){
         try
         {
-          saveChunkFile();
-            
+          if(checkFolder())
+            saveChunkFile();
         }
         catch(Exception e)
         {
