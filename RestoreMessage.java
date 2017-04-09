@@ -70,6 +70,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
           l.add(Arrays.copyOfRange(input, blockStart, i));
           blockStart = i+pattern.length;
           i = blockStart;
+          break;
        }
     }
     l.add(Arrays.copyOfRange(input, blockStart, input.length ));

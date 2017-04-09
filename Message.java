@@ -54,7 +54,7 @@ public class Message{
 /* Code to split byte[] when a pattern occurs
 Source: http://stackoverflow.com/questions/22519346/how-to-split-a-byte-array-around-a-byte-sequence-in-java
 */
-  public static boolean isMatch(byte[] pattern, byte[] input, int pos) {
+  public boolean isMatch(byte[] pattern, byte[] input, int pos) {
     for(int i=0; i< pattern.length; i++) {
         if(pattern[i] != input[pos+i]) {
             return false;
@@ -62,7 +62,7 @@ Source: http://stackoverflow.com/questions/22519346/how-to-split-a-byte-array-ar
     }
     return true;
 }
-public static List<byte[]> split(byte[] pattern, byte[] input) {
+public List<byte[]> split(byte[] pattern, byte[] input) {
     List<byte[]> l = new LinkedList<byte[]>();
     int blockStart = 0;
     for(int i=0; i<input.length; i++) {
@@ -70,6 +70,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
           l.add(Arrays.copyOfRange(input, blockStart, i));
           blockStart = i+pattern.length;
           i = blockStart;
+          break;
        }
     }
     l.add(Arrays.copyOfRange(input, blockStart, input.length ));
