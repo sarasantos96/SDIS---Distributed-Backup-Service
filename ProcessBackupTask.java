@@ -66,6 +66,15 @@ class ProcessBackupTask implements Runnable
   				byte_chunk = null;
   			}
   			file_input_stream.close();
+        if(read == 64000){
+          n_chunks++;
+          String fileId = createHashedName(filename);
+          String chunkname = fileId + "_"+n_chunks;
+          this.control.addNewLog(filename,chunkname,replicationDeg,0);
+          byte_chunk = new String("").getBytes();
+          Runnable task = new PutchunkTask(byte_chunk, fileId, n_chunks,this.replicationDeg, this.serverid,this.socket, this.addr,this.port, this.control);
+          executor.execute(task);
+        }
   		}catch(Exception e){
   			System.out.println(e.getClass().getSimpleName());
   			e.printStackTrace(new PrintStream(System.out));
