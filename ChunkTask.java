@@ -44,7 +44,7 @@ class ChunkTask implements Runnable
     }
 
     public void sendChunkMessage(byte[] bytes) throws IOException, InterruptedException{
-      RestoreMessage rm = new RestoreMessage(RestoreMessage.MsgType.CHUNK, 1, this.server_id, this.message.getFileId(), this.message.getChunkNo());
+      RestoreMessage rm = new RestoreMessage(RestoreMessage.MsgType.CHUNK, "1", this.server_id, this.message.getFileId(), this.message.getChunkNo());
 
       byte[] rm_bytes = rm.createMessage(bytes);
 

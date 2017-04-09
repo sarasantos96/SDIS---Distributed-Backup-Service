@@ -9,13 +9,13 @@ public class RestoreMessage{
   public final char[] CRLF = {0xD,0xA,0xD,0xA};
   public enum MsgType{CHUNK};
   private MsgType messageType;
-  private int version;
+  private String version;
   private int senderid;
   private String fileId;
   private int chunkNo;
   private byte[] body;
 
-  public RestoreMessage(MsgType msgtype, int version, int senderID, String fileId, int chunkNo){
+  public RestoreMessage(MsgType msgtype, String version, int senderID, String fileId, int chunkNo){
     this.messageType = msgtype;
     this.version = version;
     this.senderid = senderID;
@@ -40,7 +40,7 @@ public class RestoreMessage{
       System.exit(1);
     }
 
-    this.version = Integer.parseInt(split_header[1]);
+    this.version = split_header[1];
     this.senderid = Integer.parseInt(split_header[2]);
     this.fileId = split_header[3];
     this.chunkNo = Integer.parseInt(split_header[4]);
@@ -80,7 +80,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
   public MsgType getMessageType(){
     return this.messageType;
   }
-  public int getVersion(){
+  public String getVersion(){
     return this.version;
   }
   public int getsenderid(){

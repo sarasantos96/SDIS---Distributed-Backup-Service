@@ -9,13 +9,13 @@ public class RestoreControlMessage{
 	public final char[] CRLF = {0xD,0xA,0xD,0xA};
 	public enum MsgType{GETCHUNK};
 	private MsgType messageType;
-  private int version;
+  private String version;
   private int senderid;
   private String fileid;
   private int chunkNo;
 
 	//GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-  public RestoreControlMessage(MsgType msgtype, int version, int senderID, String fileID, int chunkNo){
+  public RestoreControlMessage(MsgType msgtype, String version, int senderID, String fileID, int chunkNo){
   	this.messageType = msgtype;
   	this.version = version;
   	this.senderid = senderID;
@@ -38,7 +38,7 @@ public class RestoreControlMessage{
      	System.exit(1);
      }
 
-    this.version = Integer.parseInt(split_header[1]);
+    this.version = new String(split_header[1]);
     this.senderid = Integer.parseInt(split_header[2]);
     this.fileid = new String(split_header[3]);
     this.chunkNo = Integer.parseInt(split_header[4]);

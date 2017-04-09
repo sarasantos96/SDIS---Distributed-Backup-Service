@@ -299,63 +299,14 @@ public class Client implements RMI_Interface{
     }
     this.size = new Long(target_space);
   }
-
+  //(String fileid, String filename, int number_of_chunks, int id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port)
   public void processRestore(String arg1) throws IOException{
     //arg1 = file name
     String fileid = control.getFileIdByFilename(arg1);
     int number_of_chunks = control.getNumberOfChunks(arg1);
 
-    String folder_name = new String("./Peer" + this.id + "/tmp/" + fileid);
-    boolean create_folder = (new File(folder_name)).mkdirs();
-    int chunk_number = 1;
-    int version = 1;
-
-    for(int i = 0; i < number_of_chunks; i++){
-      RestoreControlMessage cm = new RestoreControlMessage(RestoreControlMessage.MsgType.GETCHUNK, version, this.id, fileid, i + 1);
-      byte[] bytes = cm.createMessage();
-      sendMCMessage(bytes);
-    }
-
-    int i = 0;
-    while(i != number_of_chunks){
-      i = new File("Peer" + this.id + "/tmp/" + fileid).list().length;
-    }
-
-    joinFiles(fileid, arg1, number_of_chunks);
-
-  }
-
-  public void joinFiles(String fileid, String filename, int n_chunks) throws IOException{
-    File output_file = new File("restored_" + filename);
-    String chunks_path = "Peer" + this.id + "/tmp/" + fileid + "/";
-    System.out.println(chunks_path);
-    FileInputStream file_input_stream;
-    FileOutputStream file_output_stream;
-    int n_bytes_read = 0;
-    byte[] input_bytes;
-
-    try{
-      file_output_stream = new FileOutputStream(output_file, true);
-      for(int i = 0; i < n_chunks; i++){
-        String input_file_name = chunks_path + fileid + "_" + (i + 1);
-
-        File input_file = new File(input_file_name);
-        file_input_stream = new FileInputStream(input_file);
-        input_bytes = new byte[(int) input_file.length()];
-        n_bytes_read = file_input_stream.read(input_bytes, 0, (int) input_file.length());
-        file_output_stream.write(input_bytes);
-        file_output_stream.flush();
-        file_input_stream.close();
-        file_input_stream = null;
-        input_bytes = null;
-
-      }
-      file_output_stream.close();
-      file_output_stream = null;
-    }catch(Exception e){
-      System.out.println(e.getClass().getSimpleName());
-      e.printStackTrace(new PrintStream(System.out));
-    }
+    Runnable task = new RestoreTask(fileid, arg1, number_of_chunks, this.id, this.mcsocket, this.mcaddr, this.mc_port);
+    peerExecutor.execute(task);
   }
 
 }
