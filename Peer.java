@@ -44,7 +44,7 @@ public class Peer{
     String logfilename = new String(folder_name +"/"+"logfile.txt");
     this.control = new ReplicationControl(logfilename);
 
-    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, this.control,this.size);
+    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port,this.control,this.size,executor);
     this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,this.control,this.size);
     this.thread = new ServerThread();
     this.thread.start();
@@ -54,14 +54,7 @@ public class Peer{
   //java Peer <server id> <mc_addr> <mc_port> <mdb_addr> <mdb_port> <mdr_addr> <mdr_port>
   public static void main(String [] args) throws UnknownHostException, IOException, InterruptedException{
     Peer peer = new Peer(Integer.parseInt(args[0]),args[1], Integer.parseInt(args[2]), args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]));
-    //peer.sendMessage();
   }
-
-  /*public void sendMessage()throws IOException{
-    while(true){
-      this.client.sendMulticastMessage(this.serverid);
-    }
-  }*/
 
   private class ServerThread extends Thread{
     public void run(){
