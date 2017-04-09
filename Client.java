@@ -153,18 +153,6 @@ public class Client implements RMI_Interface{
         String chunkname = fileId + "_"+n_chunks;
         this.control.addNewLog(filename,chunkname,replicationDeg,0);
 				sendMDBMessage(byte_chunk, id, fileId,n_chunks);
-
-        boolean continues = true;
-        int tries = 0;
-        while(continues && tries < 5){
-          Thread.sleep(1000);
-          if(this.control.getAtualRepDeg(chunkname) < this.control.getRepDeg(chunkname))
-            sendMDBMessage(byte_chunk, id, fileId,n_chunks);
-          else
-            continues = false;
-
-          tries++;
-        }
 				byte_chunk = null;
 			}
 			file_input_stream.close();
@@ -179,8 +167,9 @@ public class Client implements RMI_Interface{
     mcsocket.send(packet);
   }
 
-  public void sendMDBMessage(byte[] body, int senderid, String filename, int chunkNo) throws IOException{
+  public void sendMDBMessage(byte[] body, int senderid, String filename, int chunkNo) throws IOException, InterruptedException{
 
+      Thread.sleep(1000);
       Message msg = new Message(Message.MsgType.PUTCHUNK, senderid);
       msg.setFileID(filename);
       msg.setVersion("1.0");
@@ -188,6 +177,18 @@ public class Client implements RMI_Interface{
 
       DatagramPacket packet = new DatagramPacket(full_msg,full_msg.length,mdbaddr,mdb_port);
       mdbsocket.send(packet);
+
+      boolean continues = true;
+      int tries = 0;
+      String chunkname = new String(filename+"_"+chunkNo);
+      while(continues && tries < 5){
+        Thread.sleep(1000);
+        if(this.control.getAtualRepDeg(chunkname) < this.control.getRepDeg(chunkname))
+          mdbsocket.send(packet);
+        else
+          continues = false;
+        tries++;
+      }
   }
 
   public void sendMDRMessage(String message, int senderid)throws IOException, FileNotFoundException{
@@ -269,19 +270,32 @@ public class Client implements RMI_Interface{
       return len_sum;
   }
 
-  public void reclaimStorage(String path, long target_space){
+  public void reclaimStorage(String path, long target_space) throws IOException{
     File folder = new File(path);
     File[] listOfFiles = folder.listFiles();
-
+    ArrayList<File> filenames = new ArrayList<File>();
+    for(int i=0; i < listOfFiles.length; i++){
+      if(!listOfFiles[i].getName().equals("logfile.txt"))
+        filenames.add(listOfFiles[i]);
+    }
     HashMap<String, Long> map = listFiles(listOfFiles);
     long space = calculateTotalSpace(map);
 
     while(space > target_space){
-      listOfFiles[0].delete();
-      System.out.println("Deleted file " + listOfFiles[0].getName());
-      listOfFiles = folder.listFiles();
-      map = listFiles(listOfFiles);
-      space = calculateTotalSpace(map);
+      String filename = filenames.get(0).getName();
+      File file = new File(path+"/"+filename);
+      file.delete();
+      filenames.remove(0);
+      space -= map.get(filename);
+      map.remove(filename);
+
+      Message message = new Message(Message.MsgType.REMOVED, id);
+      String fileId = filename.split("_")[0];
+      int chunkNo = Integer.parseInt(filename.split("_")[1]);
+      message.setFileID(fileId);
+      message.setVersion("1.0");
+      byte[] msg = message.createRemovedMessage(chunkNo);
+      sendMCMessage(msg);
     }
     this.size = new Long(target_space);
   }

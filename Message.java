@@ -6,7 +6,7 @@ import java.util.regex.*;
 
 public class Message{
   public final char[] CRLF = {0xD,0xA,0xD,0xA};
-  public enum MsgType{PUTCHUNK, RESTORE,STORED,DELETE};
+  public enum MsgType{PUTCHUNK, RESTORE,STORED,DELETE,REMOVED};
   private MsgType messageType;
   private String version;
   private int senderid;
@@ -36,6 +36,8 @@ public class Message{
       this.messageType = MsgType.STORED;
     }else if(split_header[0].equals("DELETE")){
       this.messageType = MsgType.DELETE;
+    }else if(split_header[0].equals("REMOVED")){
+      this.messageType = MsgType.REMOVED;
     }
     this.version = split_header[1];
     this.senderid = Integer.parseInt(split_header[2]);
@@ -140,6 +142,12 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
   public byte[] createDeleteMessage(String version){
     String crlf = new String(CRLF);
     String msg = new String("DELETE "+version+" "+ this.senderid +" "+ this.fileId + crlf);
+    return msg.getBytes();
+  }
+
+  public byte[] createRemovedMessage(int chunkNo){
+    String crlf = new String(CRLF);
+    String msg = new String("REMOVED "+this.version + " "+this.senderid +" "+ this.fileId + " "+chunkNo + crlf);
     return msg.getBytes();
   }
 

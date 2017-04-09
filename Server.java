@@ -87,6 +87,14 @@ public class Server{
               peerExecutor.execute(task);
             }
           }
+          if(type.equals("REMOVED")){
+            Message removedMsg = new Message(packet.getData());
+            if(removedMsg.getsenderid() != server_id){
+              Runnable task = new RemovedTask(removedMsg,server_id,control);
+              peerExecutor.execute(task);
+              System.out.println("EI APAGUEI UM CHUNK");
+            }
+          }
         }
       }catch(Exception e){
         System.out.println(e.getClass().getSimpleName());

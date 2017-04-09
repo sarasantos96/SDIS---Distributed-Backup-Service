@@ -80,6 +80,12 @@ public class ReplicationControl{
     this.addNewLog(oldvalue.filename,chunckname,oldvalue.replicationDeg,oldvalue.atualReplicationDeg + 1);
   }
 
+  public void decreaseRepDeg(String fileId, int chunkNo) throws IOException{
+    String chunckname = new String(fileId+"_"+chunkNo);
+    Value oldvalue = this.hmap.get(chunckname);
+    this.addNewLog(oldvalue.filename,chunckname,oldvalue.replicationDeg,oldvalue.atualReplicationDeg - 1);
+  }
+
   public int getRepDeg(String chunckname){
     return this.hmap.get(chunckname).replicationDeg;
   }
