@@ -44,7 +44,7 @@ public class Peer{
     String logfilename = new String(folder_name +"/"+"logfile.txt");
     this.control = new ReplicationControl(logfilename);
 
-    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, this.control,this.size);
+    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port,this.control,this.size,executor);
     this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,this.control,this.size);
     this.thread = new ServerThread();
     this.thread.start();

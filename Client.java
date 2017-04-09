@@ -14,10 +14,10 @@ import javax.xml.bind.DatatypeConverter;
 import java.nio.file.Path;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
-
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 public class Client implements RMI_Interface{
-  public static final int CHUNCK_SIZE = 64000;
 
   //Multicast
   private String mc_addr;
@@ -35,11 +35,13 @@ public class Client implements RMI_Interface{
   private int id;
   private ReplicationControl control;
   private Long size;
+  private ExecutorService executor;
 
   public int rmiRequest(String type, String arg1, String arg2) throws IOException, InterruptedException {
     switch(type){
       case "Backup":
-        processBackup(arg1,Integer.parseInt(arg2),id);
+        Runnable task = new ProcessBackupTask(arg1, Integer.parseInt(arg2), id, control, mdbsocket, mdbaddr, mdb_port);
+        executor.execute(task);
         break;
       case "Restore":
         processRestore(arg1);
@@ -63,7 +65,7 @@ public class Client implements RMI_Interface{
 
   public Client() {}
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port,ReplicationControl control,Long size, int whynot) throws UnknownHostException, InterruptedException, IOException {
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port,ReplicationControl control,Long size,ExecutorService executor, int whynot) throws UnknownHostException, InterruptedException, IOException {
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -73,6 +75,7 @@ public class Client implements RMI_Interface{
     this.id = id;
     this.size = size;
     this.control = control;
+    this.executor = executor;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -85,7 +88,7 @@ public class Client implements RMI_Interface{
     this.mdrsocket.setTimeToLive(1);
   }
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control, Long size) throws UnknownHostException, InterruptedException, IOException{
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control, Long size,ExecutorService executor) throws UnknownHostException, InterruptedException, IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -95,6 +98,7 @@ public class Client implements RMI_Interface{
     this.id = id;
     this.control = control;
     this.size = size;
+    this.executor = executor;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -108,7 +112,7 @@ public class Client implements RMI_Interface{
 
     System.out.println("Peer ID : " + id);
     try{
-      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, control, size,0);
+      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, control, size, executor,0);
       RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0);
 
       Registry registry = LocateRegistry.getRegistry();
@@ -132,35 +136,6 @@ public class Client implements RMI_Interface{
     control.deleteAllEntries(fileId);
   }
 
-  public void processBackup(String filename,int replicationDeg,int id){
-		File input_file = new File(filename);
-		FileInputStream file_input_stream;
-		long file_size = input_file.length();
-		int read = 0, n_bytes = CHUNCK_SIZE;
-		byte[] byte_chunk;
-    int n_chunks = 0;
-
-		try{
-			file_input_stream = new FileInputStream(input_file);
-			while(file_size > 0){
-				if(file_size <= CHUNCK_SIZE)
-					n_bytes = (int) file_size;
-				byte_chunk = new byte[n_bytes];
-				read = file_input_stream.read(byte_chunk, 0, n_bytes);
-				file_size = file_size - read;
-				n_chunks++;
-        String fileId = createHashedName(filename);
-        String chunkname = fileId + "_"+n_chunks;
-        this.control.addNewLog(filename,chunkname,replicationDeg,0);
-				sendMDBMessage(byte_chunk, id, fileId,n_chunks);
-				byte_chunk = null;
-			}
-			file_input_stream.close();
-		}catch(Exception e){
-			System.out.println(e.getClass().getSimpleName());
-			e.printStackTrace(new PrintStream(System.out));
-		}
-  }
 
   public void sendMCMessage(byte[] bytes) throws IOException{
     DatagramPacket packet = new DatagramPacket(bytes,bytes.length,mcaddr,mc_port);
@@ -212,36 +187,6 @@ public class Client implements RMI_Interface{
     System.arraycopy(rawbody, 0,receive_body, 0, i+1);
     saveChunck(body,senderid);
     System.out.println("Ficheiro guardado");*/
-  }
-
-  public static String hash(String text){
-    try{
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] hash = digest.digest(text.getBytes(StandardCharsets.UTF_8));
-      String s = DatatypeConverter.printHexBinary(hash);
-      return s;
-    }catch(Exception e){
-      System.out.println(e.getClass().getSimpleName());
-      e.printStackTrace(new PrintStream(System.out));
-      return null;
-    }
-
-  }
-
-  public static String createName(String name) throws IOException{
-    Path path = Paths.get(name);
-    BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
-    long size = attr.size();
-    FileTime modified_date = attr.lastModifiedTime();
-
-    String string_to_hash = name + size + modified_date;
-    return string_to_hash;
-  }
-
-  public static String createHashedName(String name) throws IOException{
-    String s = createName(name);
-    s = hash(s);
-    return s;
   }
 
   public static HashMap<String, Long> listFiles(File[] listOfFiles){
