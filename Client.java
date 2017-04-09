@@ -203,7 +203,7 @@ public class Client implements RMI_Interface{
     int number_of_chunks = control.getNumberOfChunks(arg1);
 
     Runnable task = new RestoreTask(fileid, arg1, number_of_chunks, this.id, this.mcsocket, this.mcaddr, this.mc_port);
-    peerExecutor.execute(task);
+    executor.execute(task);
   }
 
 }
