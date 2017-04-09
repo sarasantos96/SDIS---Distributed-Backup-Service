@@ -36,11 +36,12 @@ public class Client implements RMI_Interface{
   private ReplicationControl control;
   private Long size;
   private ExecutorService executor;
+  private MyFilesLog myfiles;
 
   public int rmiRequest(String type, String arg1, String arg2) throws IOException, InterruptedException {
     switch(type){
       case "Backup":
-        Runnable task = new ProcessBackupTask(arg1, Integer.parseInt(arg2), id, control, this.mdbsocket,this.mdbaddr, this.mdb_port, this.executor);
+        Runnable task = new ProcessBackupTask(arg1, Integer.parseInt(arg2), id, control, this.mdbsocket,this.mdbaddr, this.mdb_port, this.executor,this.myfiles);
         executor.execute(task);
         break;
       case "Restore":
@@ -65,7 +66,7 @@ public class Client implements RMI_Interface{
 
   public Client() {}
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port,ReplicationControl control,Long size,ExecutorService executor, int whynot) throws UnknownHostException, InterruptedException, IOException {
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port,ReplicationControl control,Long size,ExecutorService executor,MyFilesLog myfiles, int whynot) throws UnknownHostException, InterruptedException, IOException {
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -76,6 +77,7 @@ public class Client implements RMI_Interface{
     this.size = size;
     this.control = control;
     this.executor = executor;
+    this.myfiles = myfiles;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -88,7 +90,7 @@ public class Client implements RMI_Interface{
     this.mdrsocket.setTimeToLive(1);
   }
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control, Long size,ExecutorService executor) throws UnknownHostException, InterruptedException, IOException{
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control, Long size,ExecutorService executor,MyFilesLog myfiles) throws UnknownHostException, InterruptedException, IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -99,6 +101,7 @@ public class Client implements RMI_Interface{
     this.control = control;
     this.size = size;
     this.executor = executor;
+    this.myfiles = myfiles;
 
     this.mcaddr = InetAddress.getByName(this.mc_addr);
     this.mcsocket = new MulticastSocket(this.mc_port);
@@ -112,7 +115,7 @@ public class Client implements RMI_Interface{
 
     System.out.println("Peer ID : " + id);
     try{
-      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, control, size, executor,0);
+      Client obj = new Client(id, mc_addr, mc_port, mdb_addr, mdb_port, mdr_addr, mdr_port, control, size, executor,myfiles,0);
       RMI_Interface stub = (RMI_Interface) UnicastRemoteObject.exportObject(obj, 0);
 
       Registry registry = LocateRegistry.getRegistry();
@@ -123,7 +126,7 @@ public class Client implements RMI_Interface{
   }
 
   public void processDelete(String filename, int id) throws IOException, InterruptedException{
-    String fileId = control.getFileIdByFilename(filename);
+    /*String fileId = control.getFileIdByFilename(filename);
     Message message = new Message(Message.MsgType.DELETE, id);
     message.setFileID(fileId);
     byte [] msg = message.createDeleteMessage("1.0");
@@ -133,7 +136,7 @@ public class Client implements RMI_Interface{
       Thread.sleep(10);
       i++;
     }
-    control.deleteAllEntries(fileId);
+    control.deleteAllEntries(fileId);*/
   }
 
   public void sendMCMessage(byte[] bytes) throws IOException{
@@ -199,11 +202,11 @@ public class Client implements RMI_Interface{
   //(String fileid, String filename, int number_of_chunks, int id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port)
   public void processRestore(String arg1) throws IOException{
     //arg1 = file name
-    String fileid = control.getFileIdByFilename(arg1);
+  /*  String fileid = control.getFileIdByFilename(arg1);
     int number_of_chunks = control.getNumberOfChunks(arg1);
 
     Runnable task = new RestoreTask(fileid, arg1, number_of_chunks, this.id, this.mcsocket, this.mcaddr, this.mc_port);
-    executor.execute(task);
+    executor.execute(task);*/
   }
 
 }

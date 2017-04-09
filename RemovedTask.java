@@ -25,9 +25,8 @@ class RemovedTask implements Runnable
     }
 
     public void updateReplicationDeg() throws IOException{
-      if(this.control.isChunkOwner(new String(this.fileId+"_"+this.chunkNo))){
-        this.control.decreaseRepDeg(this.fileId,this.chunkNo);
-      }
+      //if(this.control.isChunkOwner(new String(this.fileId+"_"+this.chunkNo))){
+      //}
     }
 
     @Override

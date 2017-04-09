@@ -54,7 +54,7 @@ class PutchunkTask implements Runnable
         String chunkname = new String(fileId+"_"+chunkNo);
         while(continues && tries < 5){
           Thread.sleep(1000);
-          if(this.control.getAtualRepDeg(chunkname) < this.control.getRepDeg(chunkname))
+          if(this.control.getAtualRepDeg(chunkname) < this.replicationDeg)
             socket.send(packet);
           else
             continues = false;

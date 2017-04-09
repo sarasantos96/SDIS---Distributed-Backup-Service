@@ -19,8 +19,10 @@ public class Peer{
   private ServerThread thread;
   private Long size;
 
-  public ExecutorService executor;
-  public ReplicationControl control;
+  private ExecutorService executor;
+  private ReplicationControl control;
+  private StoredControl storedcontrol;
+  private MyFilesLog myfiles;
 
 
   public Peer(int server_id,String mc_addr, int mc_port,String mdb_addr, int mdb_port,String mdr_addr, int mdr_port) throws UnknownHostException, IOException, InterruptedException{
@@ -43,9 +45,13 @@ public class Peer{
 
     String logfilename = new String(folder_name +"/"+"logfile.txt");
     this.control = new ReplicationControl(logfilename);
+    String storedfilename = new String(folder_name+"/storedlog.txt");
+    this.storedcontrol = new StoredControl(storedfilename);
+    String myfilesname = new String(folder_name+"/myfileslog.txt");
+    this.myfiles = new MyFilesLog(myfilesname);
 
-    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port,this.control,this.size,executor);
-    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,this.control,this.size);
+    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port,this.control,this.size,executor,this.myfiles);
+    this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,this.control,this.size,this.myfiles,this.storedcontrol);
     this.thread = new ServerThread();
     this.thread.start();
   }

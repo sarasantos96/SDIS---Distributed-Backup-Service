@@ -16,8 +16,9 @@ class BackupTask implements Runnable
     private InetAddress mc_inetAddr;
     private int mc_port;
     private Long size;
+    private StoredControl storedcontrol;
 
-    public BackupTask(Message message, int server_id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port,Long size)
+    public BackupTask(Message message, int server_id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port,Long size,StoredControl storedcontrol)
     {
         this.message = message;
         this.server_id = server_id;
@@ -25,6 +26,7 @@ class BackupTask implements Runnable
         this.mc_inetAddr = mc_inetAddr;
         this.mc_port = mc_port;
         this.size = size;
+        this.storedcontrol = storedcontrol;
     }
 
     public Long folderSize() {
@@ -41,12 +43,10 @@ class BackupTask implements Runnable
       if(folderSize() + receive_bytes.length < this.size){
         String directory = new String("Peer"+this.server_id+ "/"+this.message.getFileId()+"_"+this.message.getChunkNo());
         File file = new File(directory);
-        if(!file.exists()){
-          FileOutputStream fos = new FileOutputStream(directory);
-          fos.write(receive_bytes);
-          fos.close();
-          sendStoredMessage();
-        }
+        FileOutputStream fos = new FileOutputStream(directory);
+        fos.write(receive_bytes);
+        fos.close();
+        sendStoredMessage();
       }
     }
 
@@ -70,6 +70,7 @@ class BackupTask implements Runnable
         try
         {
           saveChunck(message.getBody());
+          storedcontrol.addNewLog(new String(message.getFileId()+"_"+message.getChunkNo()),message.getReplicationDeg(),null);
         }
         catch(Exception e)
         {

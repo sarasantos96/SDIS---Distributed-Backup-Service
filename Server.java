@@ -26,8 +26,10 @@ public class Server{
   private ExecutorService peerExecutor;
   private ReplicationControl control;
   private Long size;
+  private MyFilesLog myfiles;
+  private StoredControl storedcontrol;
 
-  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor, ReplicationControl control,Long size) throws IOException{
+  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor, ReplicationControl control,Long size,MyFilesLog myfiles,StoredControl storedcontrol) throws IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -38,6 +40,8 @@ public class Server{
     this.peerExecutor = peerExecutor;
     this.control = control;
     this.size = size;
+    this.myfiles = myfiles;
+    this.storedcontrol = storedcontrol;
 
     //Threads
     this.mcthread = new MCThread();
@@ -67,10 +71,15 @@ public class Server{
 
           if(type.equals("STORED")){
             Message message = new Message(packet.getData());
-            if(message.getsenderid() != server_id && control.isChunkOwner(message.getFileId()+"_"+message.getChunkNo())){
-                control.updateRepDeg(message.getFileId()+"_"+message.getChunkNo());
-            }
+            String chunkname = message.getFileId()+"_"+message.getChunkNo();
+            if(message.getsenderid() != server_id && myfiles.isFileOwner(message.getFileId())){
+                System.out.println("Received: "+message.getsenderid());
+                if(!control.isStored(chunkname,message.getsenderid())){
+                  System.out.println("Stored");
+                  control.addNewLog(chunkname,message.getsenderid(),message.getChunkNo());
+                }
 
+            }
           }
           if(type.equals("GETCHUNK")){
             RestoreControlMessage message = new RestoreControlMessage(packet.getData());
@@ -127,7 +136,7 @@ public class Server{
           Message msg = new Message(data);
           if(server_id != msg.getsenderid()){
             System.out.println("MDB message: "+ "backup");
-            Runnable task = new BackupTask(msg,server_id,mcsocket,mc_inetAddr,mc_port,size);
+            Runnable task = new BackupTask(msg,server_id,mcsocket,mc_inetAddr,mc_port,size,storedcontrol);
             peerExecutor.execute(task);
           }
         }

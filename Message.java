@@ -44,6 +44,8 @@ public class Message{
     this.fileId = split_header[3];
     if(this.messageType != MsgType.DELETE)
       this.chunkNo = Integer.parseInt(split_header[4]);
+    if(this.messageType == MsgType.PUTCHUNK)
+      this.replicationDeg = Integer.parseInt(split_header[5]);
 
 
     if(headerNBody.size() > 1){

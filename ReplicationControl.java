@@ -6,10 +6,10 @@ import java.nio.*;
 
 public class ReplicationControl{
   private String logFileName;
-  private HashMap<String,Value> hmap;
+  private HashMap<Key,Integer> hmap;
 
   public ReplicationControl(String logFileName) throws IOException{
-    this.hmap = new HashMap<String, Value>();
+    this.hmap = new HashMap<Key, Integer>();
     this.logFileName = logFileName;
     File logFile = new File(logFileName);
     if(!logFile.exists())
@@ -19,22 +19,19 @@ public class ReplicationControl{
 
   }
 
-  public class Value{
-    public String filename;
-    public int replicationDeg;
-    public int atualReplicationDeg;
+  public class Key{
+    public String chunkname;
+    public int senderid;
 
-    public Value(String filename, int replicationDeg, int atualReplicationDeg){
-      this.filename = filename;
-      this.replicationDeg = replicationDeg;
-      this.atualReplicationDeg = atualReplicationDeg;
+    public Key(String chunkname, int senderid){
+      this.chunkname = chunkname;
+      this.senderid = senderid;
     }
-
   }
 
-  public void addNewLog(String filename,String chunkname, int replicationDeg, int atualReplicationDeg) throws IOException{
-    Value value = new Value(filename,replicationDeg, atualReplicationDeg);
-    this.hmap.put(chunkname,value);
+  public void addNewLog(String chunkname, int senderid,int chunkNo) throws IOException{
+    Key key  = new Key(chunkname, senderid);
+    this.hmap.put(key,chunkNo);
     this.saveHmap();
   }
 
@@ -47,11 +44,12 @@ public class ReplicationControl{
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
 				String [] split = line.split(":");
-        String chunkname = split[0];
-        String filename = split[1];
-        int replicationDeg = Integer.parseInt(split[2]);
-        int atualReplicationDeg = Integer.parseInt(split[3]);
-        this.addNewLog(filename,chunkname,replicationDeg,atualReplicationDeg);
+        if(split.length == 3){
+          String chunkname = split[0];
+          int senderid = Integer.parseInt(split[1]);
+          int chunkNo = Integer.parseInt(split[2]);
+          this.addNewLog(chunkname,senderid,chunkNo);
+        }
 			}
 			fileReader.close();
 		} catch (IOException e) {
@@ -61,12 +59,11 @@ public class ReplicationControl{
 
   public void saveHmap() throws IOException{
     String content = new String("");
-    for(Map.Entry<String, Value> entry: this.hmap.entrySet()) {
-        String chunkname = entry.getKey();
-        String filename = entry.getValue().filename;
-        int replicationDeg = entry.getValue().replicationDeg;
-        int atualReplicationDeg = entry.getValue().atualReplicationDeg;
-        content += chunkname+":"+filename+":"+replicationDeg+":"+atualReplicationDeg+"\n";
+    for(Map.Entry<Key, Integer> entry: this.hmap.entrySet()) {
+        String chunkname = entry.getKey().chunkname;
+        int senderid = entry.getKey().senderid;
+        int chunkNo = entry.getValue();
+        content += chunkname+":"+senderid+":"+chunkNo+"\n";
 
     }
     byte data[] = content.trim().getBytes();
@@ -75,39 +72,30 @@ public class ReplicationControl{
     out.close();
   }
 
-  public void updateRepDeg(String chunckname) throws IOException{
-    Value oldvalue = this.hmap.get(chunckname);
-    this.addNewLog(oldvalue.filename,chunckname,oldvalue.replicationDeg,oldvalue.atualReplicationDeg + 1);
+  public int getAtualRepDeg(String chunkname){
+    int rep = 0;
+    for(Map.Entry<Key, Integer> entry: this.hmap.entrySet()) {
+        String name = entry.getKey().chunkname;
+        if(name.equals(chunkname))
+          rep++;
+    }
+    return rep;
   }
 
-  public void decreaseRepDeg(String fileId, int chunkNo) throws IOException{
-    String chunckname = new String(fileId+"_"+chunkNo);
-    Value oldvalue = this.hmap.get(chunckname);
-    this.addNewLog(oldvalue.filename,chunckname,oldvalue.replicationDeg,oldvalue.atualReplicationDeg - 1);
-  }
-
-  public int getRepDeg(String chunckname){
-    return this.hmap.get(chunckname).replicationDeg;
-  }
-
-  public int getAtualRepDeg(String chunckname){
-    return this.hmap.get(chunckname).atualReplicationDeg;
-  }
-
-  public boolean isChunkOwner(String chunckname){
-    Value value = this.hmap.get(chunckname);
-
-    if(value != null)
-      return true;
-
+  public boolean isChunkOwner(String chunkname){
+    for(Map.Entry<Key, Integer> entry: this.hmap.entrySet()) {
+        String name = entry.getKey().chunkname;
+        if(name.equals(chunkname))
+          return true;
+    }
     return false;
   }
 
   public void deleteAllEntries(String fileId) throws IOException{
 
-    for(Iterator<Map.Entry<String, Value>> i = this.hmap.entrySet().iterator(); i.hasNext(); ){
-      Map.Entry<String, Value> entry = i.next();
-      String chunkname = entry.getKey();
+    for(Iterator<Map.Entry<Key, Integer>> i = this.hmap.entrySet().iterator(); i.hasNext(); ){
+      Map.Entry<Key, Integer> entry = i.next();
+      String chunkname = entry.getKey().chunkname;
       String entryfileId = chunkname.split("_")[0];
 
       if(entryfileId.equals(fileId)){
@@ -117,25 +105,35 @@ public class ReplicationControl{
     saveHmap();
   }
 
-  public String getFileIdByFilename(String filename){
-    for(Map.Entry<String, Value> entry: this.hmap.entrySet()) {
+/*  public String getFileIdByFilename(String filename){
+    for(Map.Entry<Key, Value> entry: this.hmap.entrySet()) {
         String current_filename = entry.getValue().filename;
         if(filename.equals(current_filename)){
-          return entry.getKey().split("_")[0];
+          return entry.getKey().chunkname.split("_")[0];
         }
     }
     return null;
-  }
+  }*/
 
-  public int getNumberOfChunks(String filename){
+/*  public int getNumberOfChunks(String filename){
     int n_chunks = 0;
 
-    for(Map.Entry<String, Value> entry: this.hmap.entrySet()) {
+    for(Map.Entry<Key, Value> entry: this.hmap.entrySet()) {
         String current_filename = entry.getValue().filename;
         if(filename.equals(current_filename)){
           n_chunks++;
         }
     }
     return n_chunks;
+  }*/
+
+  public boolean isStored(String chunkname, int senderid){
+    for(Map.Entry<Key, Integer> entry: this.hmap.entrySet()) {
+        String name = entry.getKey().chunkname;
+        int id = entry.getKey().senderid;
+        if(name.equals(chunkname) && senderid == id)
+          return true;
+    }
+    return false;
   }
 }
