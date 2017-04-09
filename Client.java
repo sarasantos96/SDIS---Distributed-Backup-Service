@@ -40,7 +40,7 @@ public class Client implements RMI_Interface{
   public int rmiRequest(String type, String arg1, String arg2) throws IOException, InterruptedException {
     switch(type){
       case "Backup":
-        Runnable task = new ProcessBackupTask(arg1, Integer.parseInt(arg2), id, control, mdbsocket, mdbaddr, mdb_port);
+        Runnable task = new ProcessBackupTask(arg1, Integer.parseInt(arg2), id, control, this.mdbsocket,this.mdbaddr, this.mdb_port, this.executor);
         executor.execute(task);
         break;
       case "Restore":
@@ -136,57 +136,9 @@ public class Client implements RMI_Interface{
     control.deleteAllEntries(fileId);
   }
 
-
   public void sendMCMessage(byte[] bytes) throws IOException{
     DatagramPacket packet = new DatagramPacket(bytes,bytes.length,mcaddr,mc_port);
     mcsocket.send(packet);
-  }
-
-  public void sendMDBMessage(byte[] body, int senderid, String filename, int chunkNo) throws IOException, InterruptedException{
-
-      Thread.sleep(1000);
-      Message msg = new Message(Message.MsgType.PUTCHUNK, senderid);
-      msg.setFileID(filename);
-      msg.setVersion("1.0");
-      byte[] full_msg = msg.createMessage(body,chunkNo);
-
-      DatagramPacket packet = new DatagramPacket(full_msg,full_msg.length,mdbaddr,mdb_port);
-      mdbsocket.send(packet);
-
-      boolean continues = true;
-      int tries = 0;
-      String chunkname = new String(filename+"_"+chunkNo);
-      while(continues && tries < 5){
-        Thread.sleep(1000);
-        if(this.control.getAtualRepDeg(chunkname) < this.control.getRepDeg(chunkname))
-          mdbsocket.send(packet);
-        else
-          continues = false;
-        tries++;
-      }
-  }
-
-  public void sendMDRMessage(String message, int senderid)throws IOException, FileNotFoundException{
-    Message msg = new Message(Message.MsgType.RESTORE,senderid);
-    byte[] body = new byte[0];
-    byte[] full_msg = msg.createMessage(body,1); //!!!!
-
-    DatagramPacket packet = new DatagramPacket(full_msg, full_msg.length,mdraddr,mdr_port);
-    mdrsocket.send(packet);
-
-    //Waits to receive and saves file
-  /*  System.out.println("Waiting file");
-    byte[] buf = new byte[254];
-    packet = new DatagramPacket(buf, buf.length);
-    mdrsocket.receive(packet);
-    //TODO: código repetido (Message.java)
-    byte[] rawbody = packet.getData();
-    int i = rawbody.length;
-    while (i-- > 0 && rawbody[i] == '\00') {}
-    byte[] receive_body = new byte[i+1];
-    System.arraycopy(rawbody, 0,receive_body, 0, i+1);
-    saveChunck(body,senderid);
-    System.out.println("Ficheiro guardado");*/
   }
 
   public static HashMap<String, Long> listFiles(File[] listOfFiles){

@@ -28,14 +28,17 @@ class ProcessBackupTask implements Runnable
     private MulticastSocket socket;
     private InetAddress addr;
     private int port;
+    private ExecutorService executor;
 
-    public ProcessBackupTask(String filename, int replicationDeg, int serverid,ReplicationControl control, MulticastSocket socket, InetAddress addr, int port){
+    public ProcessBackupTask(String filename, int replicationDeg, int serverid,ReplicationControl control, MulticastSocket socket, InetAddress addr, int port, ExecutorService executor){
         this.filename = filename;
         this.replicationDeg = replicationDeg;
         this.serverid = serverid;
         this.control = control;
         this.socket = socket;
         this.port = port;
+        this.executor = executor;
+        this.addr = addr;
     }
 
     public void initiateBackup(){
@@ -58,7 +61,8 @@ class ProcessBackupTask implements Runnable
           String fileId = createHashedName(filename);
           String chunkname = fileId + "_"+n_chunks;
           this.control.addNewLog(filename,chunkname,replicationDeg,0);
-  				//sendMDBMessage(byte_chunk, id, fileId,n_chunks);
+  				Runnable task = new PutchunkTask(byte_chunk, fileId, n_chunks,this.replicationDeg, this.serverid,this.socket, this.addr,this.port, this.control);
+          executor.execute(task);
   				byte_chunk = null;
   			}
   			file_input_stream.close();
@@ -102,6 +106,7 @@ class ProcessBackupTask implements Runnable
     {
         try
         {
+          initiateBackup();
         }
         catch(Exception e)
         {

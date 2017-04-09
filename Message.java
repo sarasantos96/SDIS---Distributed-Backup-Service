@@ -107,7 +107,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
     this.version = version;
   }
 
-  public byte[] createMessage(byte[] body,int chunckNo){
+  public byte[] createMessage(byte[] body,int chunckNo, int replicationDeg){
     String crlf = new String(CRLF);
     //Chooses correct header for message type
     String header_type = new String("Error");
@@ -120,7 +120,7 @@ public static List<byte[]> split(byte[] pattern, byte[] input) {
       System.exit(1);
     }
     //Builds Header
-    String headermessage = new String(header_type +" "+version+" "+senderid+" "+fileId+" "+chunckNo + crlf);
+    String headermessage = new String(header_type +" "+version+" "+senderid+" "+fileId+" "+chunckNo + " "+replicationDeg+ crlf);
     byte[] header = headermessage.getBytes();
     byte[] full_msg = new byte[header.length + body.length];
     if(body.length != 0){
