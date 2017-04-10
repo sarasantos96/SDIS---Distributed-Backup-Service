@@ -132,10 +132,9 @@ public class StoredControl{
       }
     }
     saveHmap();
-  }*/
+  }
 
   public HashMap<String,Value> getHMap(){
     return hmap;
-  }
   }
 }
