@@ -1,8 +1,8 @@
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.NotBoundException;
 
 public class RMI_Client {
-
     private RMI_Client() {}
 
     public static void main(String[] args) {
@@ -27,7 +27,9 @@ public class RMI_Client {
                 System.exit(-1);
             }
             System.out.println("stub ran " + r);
-        } catch (Exception e) {
+        } catch(NotBoundException  nbe){
+            System.out.println("The Peer " + args[0] + "was not found!");
+        }catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();
         }

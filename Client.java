@@ -137,14 +137,20 @@ public class Client implements RMI_Interface{
   }
 
   public void processState(){
+
+    HashMap<String,MyFilesLog.Value> files = this.myfiles.getHMap();
+    HashMap<String,StoredControl.Value> chunks = this.storedcontrol.getHMap();
+
     System.out.println("");
     System.out.println("         ************************************");
     System.out.println("                    BACKED UP FILES          ");
     System.out.println("         ************************************");
     System.out.println("");
 
-    HashMap<String,MyFilesLog.Value> files = this.myfiles.getHMap();
-    HashMap<String,StoredControl.Value> chunks = this.storedcontrol.getHMap();
+    if(files.isEmpty()){
+      System.out.println("No files have been backed up by this Peer");
+    }
+
 
     Iterator it = files.entrySet().iterator();
     while (it.hasNext()) {
@@ -171,17 +177,26 @@ public class Client implements RMI_Interface{
     System.out.println("         ************************************");
     System.out.println("");
 
+    if(chunks.isEmpty()){
+      System.out.println("No chunks have been stored in this Peer");
+    }
+
     Iterator it_chunks = chunks.entrySet().iterator();
     while (it_chunks.hasNext()) {
         Map.Entry pair = (Map.Entry)it_chunks.next();
         String key = (String) pair.getKey();
-        System.out.println("FileId: " + key);
+        System.out.println("ChunkId: " + key);
         StoredControl.Value value = (StoredControl.Value) pair.getValue();
-        
+        File chunk_file = new File("Peer" + this.id + "/" + key);
+        System.out.println("Size: " + chunk_file.length());
+        int rep = storedcontrol.getAtualRepDeg(key);
+        System.out.println("RepDegree: " + rep);
+
         System.out.println("--------------------------------------------");
         it_chunks.remove(); // avoids a ConcurrentModificationException
     }
 
+  System.out.println("");
   }
 
 
