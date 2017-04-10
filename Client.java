@@ -128,11 +128,16 @@ public class Client implements RMI_Interface{
 
   //(String fileid, String filename, int number_of_chunks, int id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port)
   public void processRestore(String arg1) throws IOException{
-    String fileid = myfiles.getFileIdByFilename(arg1);
-    int number_of_chunks = myfiles.getNoChunks(fileid);
 
-    Runnable task = new RestoreTask(fileid, arg1, number_of_chunks, this.id, this.mcsocket, this.mcaddr, this.mc_port);
-    executor.execute(task);
+    String fileid = myfiles.getFileIdByFilename(arg1);
+    if(fileid != null){
+      int number_of_chunks = myfiles.getNoChunks(fileid);
+
+      Runnable task = new RestoreTask(fileid, arg1, number_of_chunks, this.id, this.mcsocket, this.mcaddr, this.mc_port);
+      executor.execute(task);
+    }else{
+      System.out.println("Not File Owner");
+    }
   }
 
   public void processState(){
