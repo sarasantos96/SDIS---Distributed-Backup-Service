@@ -1,0 +1,18 @@
+SDIS---Distributed-Backup-Service
+
+Para compilar e correr a aplicação deve:
+	- Abrir uma consola no diretório do projeto
+
+	- Inicializar o RMI através do comando "rmiregistry &"
+
+	- Correr o script de compilação e de inicialização de Peers através do comando "sh script.sh". Este comando compila todos os ficheiros do projeto e inicializa 4 Peers com ids sequenciais de 1 a 4
+
+	- A TestApp fica pronto a correr comandos para os Peers atraves do seguinte formato:
+
+					java TestApp <peerid> <protocolo> <arg1> <arg2>
+
+			peerid : id do Peer a comunicar
+			protocolo : backup, restore, delete, reclaim, state
+			arg1 : de acordo com o protocolo (nome de ficheiro, tamanho a reclamar)
+			arg2 : replication degree, apenas para o protocolo backup
+		 
