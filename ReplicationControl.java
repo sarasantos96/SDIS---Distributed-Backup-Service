@@ -2,14 +2,15 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.nio.*;
+import java.util.concurrent.*;
 
 
 public class ReplicationControl{
   private String logFileName;
-  private HashMap<Key,Integer> hmap;
+  private ConcurrentHashMap<Key,Integer> hmap;
 
   public ReplicationControl(String logFileName) throws IOException{
-    this.hmap = new HashMap<Key, Integer>();
+    this.hmap = new ConcurrentHashMap<Key, Integer>();
     this.logFileName = logFileName;
     File logFile = new File(logFileName);
     if(!logFile.exists())

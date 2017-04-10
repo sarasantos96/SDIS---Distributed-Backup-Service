@@ -2,14 +2,15 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.nio.*;
+import java.util.concurrent.*;
 
 
 public class StoredControl{
   private String logFileName;
-  private HashMap<String,Value> hmap;
+  private ConcurrentHashMap<String,Value> hmap;
 
   public StoredControl(String logFileName) throws IOException{
-    this.hmap = new HashMap<String, Value>();
+    this.hmap = new ConcurrentHashMap<String, Value>();
     this.logFileName = logFileName;
     File logFile = new File(logFileName);
     if(!logFile.exists())
@@ -140,7 +141,7 @@ public class StoredControl{
     saveHmap();
   }
 
-  public HashMap<String,Value> getHMap(){
+  public ConcurrentHashMap<String,Value> getHMap(){
     return hmap;
   }
 }

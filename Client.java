@@ -16,6 +16,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.*;
 
 public class Client implements RMI_Interface{
 
@@ -142,8 +143,8 @@ public class Client implements RMI_Interface{
 
   public void processState(){
 
-    HashMap<String,MyFilesLog.Value> files = this.myfiles.getHMap();
-    HashMap<String,StoredControl.Value> chunks = this.storedcontrol.getHMap();
+    ConcurrentHashMap<String,MyFilesLog.Value> files = this.myfiles.getHMap();
+    ConcurrentHashMap<String,StoredControl.Value> chunks = this.storedcontrol.getHMap();
 
     System.out.println("");
     System.out.println("         ************************************");

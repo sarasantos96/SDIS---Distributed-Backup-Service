@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.Date;
+import java.util.concurrent.*;
 
 class ReclaimTask implements Runnable{
     private String path;
@@ -29,8 +30,8 @@ class ReclaimTask implements Runnable{
       this.target_space = target_space;
     }
 
-    public static HashMap<String, Long> listFiles(File[] listOfFiles){
-      HashMap<String, Long> file_map = new HashMap<String, Long>();
+    public static ConcurrentHashMap<String, Long> listFiles(File[] listOfFiles){
+      ConcurrentHashMap<String, Long> file_map = new ConcurrentHashMap<String, Long>();
 
       for(int i = 0; i < listOfFiles.length; i++){
         if(listOfFiles[i].isFile()){
@@ -42,7 +43,7 @@ class ReclaimTask implements Runnable{
       return file_map;
     }
 
-    public static long calculateTotalSpace(HashMap<String, Long> map){
+    public static long calculateTotalSpace(ConcurrentHashMap<String, Long> map){
       Set set = map.entrySet();
       Iterator iterator = set.iterator();
       long len_sum = 0;
@@ -68,7 +69,7 @@ class ReclaimTask implements Runnable{
         if(!listOfFiles[i].getName().equals("logfile.txt") && !listOfFiles[i].getName().equals("myfileslog.txt") && !listOfFiles[i].getName().equals("storedlog.txt"))
           filenames.add(listOfFiles[i]);
       }
-      HashMap<String, Long> map = listFiles(listOfFiles);
+      ConcurrentHashMap<String, Long> map = listFiles(listOfFiles);
       long space = calculateTotalSpace(map);
 
       Long obj = space - target_space;

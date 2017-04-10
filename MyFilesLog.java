@@ -2,14 +2,15 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.nio.*;
+import java.util.concurrent.*;
 
 
 public class MyFilesLog{
   private String logFileName;
-  private HashMap<String,Value> hmap;
+  private ConcurrentHashMap<String,Value> hmap;
 
   public MyFilesLog(String logFileName) throws IOException{
-    this.hmap = new HashMap<String,Value>();
+    this.hmap = new ConcurrentHashMap<String,Value>();
     this.logFileName = logFileName;
     File logFile = new File(logFileName);
     if(!logFile.exists())
@@ -93,7 +94,7 @@ public class MyFilesLog{
     return rep;
   }
 
-  public HashMap<String,Value> getHMap(){
+  public ConcurrentHashMap<String,Value> getHMap(){
     return this.hmap;
   }
 
