@@ -138,13 +138,13 @@ public class Client implements RMI_Interface{
 
   public void processState(){
     System.out.println("");
-    System.out.println("         ******************************");
-    System.out.println("                    PEER STATE         ");
-    System.out.println("         ******************************");
+    System.out.println("         ************************************");
+    System.out.println("                    BACKED UP FILES          ");
+    System.out.println("         ************************************");
     System.out.println("");
 
     HashMap<String,MyFilesLog.Value> files = this.myfiles.getHMap();
-    //TODO print stored chunks info with the storedControl
+    HashMap<String,StoredControl.Value> chunks = this.storedcontrol.getHMap();
 
     Iterator it = files.entrySet().iterator();
     while (it.hasNext()) {
@@ -165,6 +165,22 @@ public class Client implements RMI_Interface{
         it.remove(); // avoids a ConcurrentModificationException
     }
 
+    System.out.println("");
+    System.out.println("         ************************************");
+    System.out.println("                      SAVED CHUNKS           ");
+    System.out.println("         ************************************");
+    System.out.println("");
+
+    Iterator it_chunks = chunks.entrySet().iterator();
+    while (it_chunks.hasNext()) {
+        Map.Entry pair = (Map.Entry)it_chunks.next();
+        String key = (String) pair.getKey();
+        System.out.println("FileId: " + key);
+        StoredControl.Value value = (StoredControl.Value) pair.getValue();
+        
+        System.out.println("--------------------------------------------");
+        it_chunks.remove(); // avoids a ConcurrentModificationException
+    }
 
   }
 
