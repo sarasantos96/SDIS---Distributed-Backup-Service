@@ -6,6 +6,11 @@ public class TestApp {
     private TestApp() {}
 
     public static void main(String[] args) {
+        if(args.length == 0){
+            printUsage();
+            System.exit(0);
+        }
+
         String host = null;
         try {
             Registry registry = LocateRegistry.getRegistry(host);
@@ -33,5 +38,15 @@ public class TestApp {
             System.err.println("Client exception: " + e.toString());
             e.printStackTrace();
         }
+    }
+
+    public static void printUsage(){
+        System.out.println("Usage for TestApp:");
+        System.out.println("java TestApp <peer_ap> <sub_protocol> <opnd_1> <opnd_2>");
+        System.out.println("             <peer_ap> - the id of the peer (integer)");
+        System.out.println("             <sub_protocol> - BACKUP, RESTORE, DELETE, RECLAIM, STATE");
+        System.out.println("             <opnd_1> - filename for backup, restore and delete protocols");
+        System.out.println("                        space to reclaim in reclaim protocol");
+        System.out.println("             <opnd_2> - desired replication degree in the backup sub_protocol");
     }
 }
