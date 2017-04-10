@@ -50,7 +50,7 @@ public class Peer{
     String myfilesname = new String(folder_name+"/myfileslog.txt");
     this.myfiles = new MyFilesLog(myfilesname);
 
-    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port,this.control,this.size,executor,this.myfiles);
+    this.client = new Client(server_id, this.mc_addr, this.mc_port, this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port,this.control,this.size,executor,this.myfiles,this.storedcontrol);
     this.server = new Server(this.mc_addr, this.mc_port, this.serverid , this.mdb_addr, this.mdb_port, this.mdr_addr, this.mdr_port, executor,this.control,this.size,this.myfiles,this.storedcontrol);
     this.thread = new ServerThread();
     this.thread.start();

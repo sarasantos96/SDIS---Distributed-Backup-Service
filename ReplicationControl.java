@@ -105,27 +105,19 @@ public class ReplicationControl{
     saveHmap();
   }
 
-/*  public String getFileIdByFilename(String filename){
-    for(Map.Entry<Key, Value> entry: this.hmap.entrySet()) {
-        String current_filename = entry.getValue().filename;
-        if(filename.equals(current_filename)){
-          return entry.getKey().chunkname.split("_")[0];
-        }
-    }
-    return null;
-  }*/
+  public void deleteAllSenderEntries(String fileId, int sender) throws IOException{
 
-/*  public int getNumberOfChunks(String filename){
-    int n_chunks = 0;
-
-    for(Map.Entry<Key, Value> entry: this.hmap.entrySet()) {
-        String current_filename = entry.getValue().filename;
-        if(filename.equals(current_filename)){
-          n_chunks++;
-        }
+    for(Iterator<Map.Entry<Key, Integer>> i = this.hmap.entrySet().iterator(); i.hasNext(); ){
+      Map.Entry<Key, Integer> entry = i.next();
+      String chunkname = entry.getKey().chunkname;
+      String entryfileId = chunkname.split("_")[0];
+      int id = entry.getKey().senderid;
+      if(entryfileId.equals(fileId) && id == sender){
+        i.remove();
+      }
     }
-    return n_chunks;
-  }*/
+    saveHmap();
+  }
 
   public boolean isStored(String chunkname, int senderid){
     for(Map.Entry<Key, Integer> entry: this.hmap.entrySet()) {
