@@ -2,8 +2,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.NotBoundException;
 
-public class RMI_Client {
-    private RMI_Client() {}
+public class TestApp {
+    private TestApp() {}
 
     public static void main(String[] args) {
         String host = null;
@@ -13,14 +13,14 @@ public class RMI_Client {
             int r = -1;
 
             if(args.length == 3)
-                r = stub.rmiRequest(args[1], args[2], null);
+                r = stub.rmiRequest(args[1].toUpperCase(), args[2], null);
             else
                 if(args.length == 4){
-                    r = stub.rmiRequest(args[1], args[2], args[3]);
+                    r = stub.rmiRequest(args[1].toUpperCase(), args[2], args[3]);
                 }
             else
                 if(args.length == 2){
-                    r = stub.rmiRequest(args[1], null, null);
+                    r = stub.rmiRequest(args[1].toUpperCase(), null, null);
                 }
             else{
                 System.out.println("Wrong number of arguments");

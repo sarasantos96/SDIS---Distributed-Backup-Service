@@ -54,7 +54,6 @@ class ProcessBackupTask implements Runnable
       int nChunks;
       //Se o tamanho for multiplo de CHUNCK_SIZE
       if((file_size % CHUNCK_SIZE) == 0){
-        System.out.println("oi");
         nChunks = (int) (file_size / CHUNCK_SIZE) + 1;
       }else{
         double d = (double) file_size / (double) CHUNCK_SIZE;

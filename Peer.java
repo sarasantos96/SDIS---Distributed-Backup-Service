@@ -67,7 +67,8 @@ public class Peer{
       try{
         server.start_channels();
       }catch(Exception e){
-        System.out.println("Exception caught");
+        System.out.println(e.getClass().getSimpleName());
+        e.printStackTrace(new PrintStream(System.out));
       }
     }
   }
