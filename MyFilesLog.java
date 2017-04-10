@@ -87,4 +87,8 @@ public class MyFilesLog{
     int rep = hmap.get(fileId).replicationDeg;
     return rep;
   }
+
+  public HashMap<String,Value> getHMap(){
+    return this.hmap;
+  }
 }

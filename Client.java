@@ -60,6 +60,8 @@ public class Client implements RMI_Interface{
       case "Delete":
         processDelete(arg1,id);
         break;
+      case "State":
+        processState();
     }
     return 0;
   }
@@ -208,5 +210,39 @@ public class Client implements RMI_Interface{
     Runnable task = new RestoreTask(fileid, arg1, number_of_chunks, this.id, this.mcsocket, this.mcaddr, this.mc_port);
     executor.execute(task);*/
   }
+
+  public void processState(){
+    System.out.println("");
+    System.out.println("         ******************************");
+    System.out.println("                    PEER STATE         ");
+    System.out.println("         ******************************");
+    System.out.println("");
+
+    HashMap<String,MyFilesLog.Value> files = this.myfiles.getHMap();
+    //TODO print stored chunks info with the storedControl
+
+    Iterator it = files.entrySet().iterator();
+    while (it.hasNext()) {
+        Map.Entry pair = (Map.Entry)it.next();
+        String key = (String) pair.getKey();
+        System.out.println("FileId: " + key);
+        MyFilesLog.Value value = (MyFilesLog.Value) pair.getValue();
+        System.out.println("Filename: " + value.filename);
+        System.out.println("N_Chunks: " + value.nChunks);
+        System.out.println("Target RepDegree:" + value.replicationDeg);
+
+        for(int i = 0; i < value.nChunks; i++){
+          System.out.println("    Chunk Number: " + (i + 1));
+          int repdeg = control.getAtualRepDeg(key + "_" + (i + 1));
+          System.out.println("    RepDegree: " + repdeg);
+        }
+        System.out.println("--------------------------------------------");
+        it.remove(); // avoids a ConcurrentModificationException
+    }
+
+
+  }
+
+
 
 }
