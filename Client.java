@@ -41,14 +41,14 @@ public class Client implements RMI_Interface{
 
   public int rmiRequest(String type, String arg1, String arg2) throws IOException, InterruptedException {
     switch(type){
-      case "Backup":
+      case "BACKUP":
         Runnable task = new ProcessBackupTask(arg1, Integer.parseInt(arg2), id, control, this.mdbsocket,this.mdbaddr, this.mdb_port, this.executor,this.myfiles);
         executor.execute(task);
         break;
-      case "Restore":
+      case "RESTORE":
         processRestore(arg1);
         break;
-      case "Reclaim":
+      case "RECLAIM":
         String current_path = new java.io.File( "." ).getCanonicalPath();
         boolean isNumeric = arg1.matches("-?\\d+(\\.\\d+)?");
         if(isNumeric){
@@ -60,10 +60,10 @@ public class Client implements RMI_Interface{
         break;
       /*default:
         sendMCMessage(arg1, id);*/
-      case "Delete":
+      case "DELETE":
         processDelete(arg1,id);
         break;
-      case "State":
+      case "STATE":
         processState();
     }
     return 0;

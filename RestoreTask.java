@@ -59,7 +59,6 @@ class RestoreTask implements Runnable
     public void joinFiles(String fileid, String filename, int n_chunks) throws IOException{
       File output_file = new File("Peer" + this.id + "/" + "restored_" + filename);
       String chunks_path = "Peer" + this.id + "/tmp/" + fileid + "/";
-      System.out.println(chunks_path);
       FileInputStream file_input_stream;
       FileOutputStream file_output_stream;
       int n_bytes_read = 0;

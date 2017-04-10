@@ -38,7 +38,6 @@ class ChunkTask implements Runnable
       FileInputStream file_input_stream = new FileInputStream(file);
       byte[] byte_chunk = new byte[(int) file_size];
       file_input_stream.read(byte_chunk, 0, (int) file_size);
-      System.out.println(byte_chunk.length);
 
       return byte_chunk;
     }
@@ -62,7 +61,6 @@ class ChunkTask implements Runnable
         try
         {
           File file = checkFile();
-          System.out.println("OIOI");
           if(file != null){
             
             byte[] bytes = getChunkBytes(file);

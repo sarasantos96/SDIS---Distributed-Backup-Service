@@ -84,7 +84,6 @@ public class Server{
           if(type.equals("GETCHUNK")){
             RestoreControlMessage message = new RestoreControlMessage(packet.getData());
             if(message.getSenderId() != server_id){
-              message.print();
               Runnable task = new ChunkTask(message,server_id,mdrsocket,mdr_inetAddr,mdr_port);
               peerExecutor.execute(task);
             }
@@ -154,7 +153,6 @@ public class Server{
         mdrsocket.joinGroup(mdr_inetAddr);
 
         while(true){
-          System.out.println("begin");
           byte[] buf = new byte[80000];
           DatagramPacket packet = new DatagramPacket(buf, buf.length);
           mdrsocket.receive(packet);
