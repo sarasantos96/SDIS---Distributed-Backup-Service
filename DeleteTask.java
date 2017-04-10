@@ -12,11 +12,13 @@ class DeleteTask implements Runnable{
     private String fileId;
     private ReplicationControl control;
     private int id;
+    private StoredControl storedcontrol;
 
-    public DeleteTask(String fileId, ReplicationControl control, int id){
+    public DeleteTask(String fileId, ReplicationControl control, int id, StoredControl storedcontrol){
       this.fileId = fileId;
       this.control = control;
       this.id = id;
+      this.storedcontrol = storedcontrol;
     }
 
     public ArrayList<String> getChunkNames(){
@@ -37,13 +39,14 @@ class DeleteTask implements Runnable{
       return chunkNames;
     }
 
-    public void deleteAllChunks(){
+    public void deleteAllChunks() throws IOException{
       ArrayList<String> chunkNames = getChunkNames();
       if(chunkNames.size() != 0){
         for(String filename : chunkNames){
           String path = new String("./Peer"+this.id+"/"+filename);
           File f = new File(path);
           f.delete();
+          storedcontrol.deleteAllEntries(filename);
         }
       }
     }

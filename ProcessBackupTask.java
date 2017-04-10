@@ -51,6 +51,15 @@ class ProcessBackupTask implements Runnable
   		byte[] byte_chunk;
       int n_chunks = 0;
 
+      int nChunks;
+      //Se o tamanho for multiplo de CHUNCK_SIZE
+      if((file_size % CHUNCK_SIZE) == 0){
+        System.out.println("oi");
+        nChunks = (int) (file_size / CHUNCK_SIZE) + 1;
+      }else{
+        double d = (double) file_size / (double) CHUNCK_SIZE;
+        nChunks =(int) Math.ceil(d);
+      }
   		try{
   			file_input_stream = new FileInputStream(input_file);
   			while(file_size > 0){
@@ -62,7 +71,7 @@ class ProcessBackupTask implements Runnable
   				n_chunks++;
           String fileId = createHashedName(filename);
           String chunkname = fileId + "_"+n_chunks;
-          myfiles.addNewLog(fileId,this.filename,this.replicationDeg,5);
+          myfiles.addNewLog(fileId,this.filename,this.replicationDeg,nChunks);
   				Runnable task = new PutchunkTask(byte_chunk, fileId, n_chunks,this.replicationDeg, this.serverid,this.socket, this.addr,this.port, this.control);
           executor.execute(task);
   				byte_chunk = null;

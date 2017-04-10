@@ -92,16 +92,15 @@ public class Server{
           if(type.equals("DELETE")){
             Message deleteMsg = new Message(packet.getData());
             if(deleteMsg.getsenderid() != server_id){
-              Runnable task = new DeleteTask(deleteMsg.getFileId(),control,server_id);
+              Runnable task = new DeleteTask(deleteMsg.getFileId(),control,server_id,storedcontrol);
               peerExecutor.execute(task);
             }
           }
           if(type.equals("REMOVED")){
             Message removedMsg = new Message(packet.getData());
             if(removedMsg.getsenderid() != server_id){
-              Runnable task = new RemovedTask(removedMsg,server_id,control);
+              Runnable task = new RemovedTask(removedMsg,server_id,control,storedcontrol,mdbsocket,mdb_inetAddr,mdb_port);
               peerExecutor.execute(task);
-              System.out.println("EI APAGUEI UM CHUNK");
             }
           }
         }

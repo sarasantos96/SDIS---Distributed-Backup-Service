@@ -89,22 +89,12 @@ public class StoredControl{
     out.close();
   }
 
- /*public void updateRepDeg(String chunckname) throws IOException{
-    Value oldvalue = this.hmap.get(chunckname);
-    this.addNewLog(oldvalue.filename,chunckname,oldvalue.replicationDeg,oldvalue.atualReplicationDeg + 1);
-  }*/
-
-/*  public int getRepDeg(String chunckname){
-    return this.hmap.get(chunckname).replicationDeg;
-  }
-*/
 /*  public int getAtualRepDeg(String chunckname){
     return this.hmap.get(chunckname).atualReplicationDeg;
   }*/
 
   public boolean isChunkStored(String chunckname){
     Value value = this.hmap.get(chunckname);
-    System.out.println(this.hmap.size());
 
     if(value != null)
       return true;
@@ -120,14 +110,24 @@ public class StoredControl{
     return false;
   }
 
-  /*public void deleteAllEntries(String fileId) throws IOException{
+  public void removePeer(String chunkname, String peer) throws IOException{
+    Value value = this.hmap.get(chunkname);
+    if(value.peers != null){
+      ArrayList<String> peers = value.peers;
+      peers.remove(peer);
+      String [] p_array = new String[peers.size()];
+      p_array = peers.toArray(p_array);
+      addNewLog(chunkname,value.replicationDeg,p_array);
+    }  
+  }
+
+  public void deleteAllEntries(String filename) throws IOException{
 
     for(Iterator<Map.Entry<String, Value>> i = this.hmap.entrySet().iterator(); i.hasNext(); ){
       Map.Entry<String, Value> entry = i.next();
       String chunkname = entry.getKey();
-      String entryfileId = chunkname.split("_")[0];
 
-      if(entryfileId.equals(fileId)){
+      if(chunkname.equals(filename)){
         i.remove();
       }
     }
@@ -136,5 +136,6 @@ public class StoredControl{
 
   public HashMap<String,Value> getHMap(){
     return hmap;
+  }
   }
 }
