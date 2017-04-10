@@ -125,6 +125,7 @@ class ProcessBackupTask implements Runnable
         try
         {
           initiateBackup();
+          System.out.println("Backup Done");
         }
         catch(Exception e)
         {

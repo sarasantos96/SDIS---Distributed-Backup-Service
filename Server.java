@@ -133,7 +133,6 @@ public class Server{
           System.arraycopy(packet.getData(), 0, data, 0, packet.getLength());
           Message msg = new Message(data);
           if(server_id != msg.getsenderid() && !myfiles.isFileOwner(msg.getFileId())){
-            System.out.println("MDB message: "+ "backup");
             Runnable task = new BackupTask(msg,server_id,mcsocket,mc_inetAddr,mc_port,size,storedcontrol);
             peerExecutor.execute(task);
           }

@@ -90,7 +90,7 @@ class ReclaimTask implements Runnable{
         sendMCMessage(msg);
         this.storedcontrol.deleteAllEntries(filename);
       }
-      this.size.setSize(obj);
+
     }
 
     @Override
@@ -99,6 +99,7 @@ class ReclaimTask implements Runnable{
         try
         {
           reclaimStorage();
+          System.out.println("Reclaim Done");
         }
         catch(Exception e)
         {

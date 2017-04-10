@@ -105,6 +105,7 @@ class RestoreTask implements Runnable
         try
         {
           processRestore(this.filename, this.fileid, this.number_of_chunks);
+          System.out.println("Restore Done");
         }
         catch(Exception e)
         {

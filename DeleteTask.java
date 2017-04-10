@@ -57,6 +57,7 @@ class DeleteTask implements Runnable{
         try
         {
           deleteAllChunks();
+          System.out.println("Delete Done");
         }
         catch(Exception e)
         {
