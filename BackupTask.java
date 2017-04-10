@@ -46,6 +46,7 @@ class BackupTask implements Runnable
         FileOutputStream fos = new FileOutputStream(directory);
         fos.write(receive_bytes);
         fos.close();
+        storedcontrol.addNewLog(new String(message.getFileId()+"_"+message.getChunkNo()),message.getReplicationDeg(),null);
         sendStoredMessage();
       }
     }
@@ -70,7 +71,6 @@ class BackupTask implements Runnable
         try
         {
           saveChunck(message.getBody());
-          storedcontrol.addNewLog(new String(message.getFileId()+"_"+message.getChunkNo()),message.getReplicationDeg(),null);
         }
         catch(Exception e)
         {

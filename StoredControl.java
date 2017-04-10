@@ -38,6 +38,12 @@ public class StoredControl{
     this.saveHmap();
   }
 
+  public void addNewPeer(String chunkname, String peer) throws IOException{
+    Value value = this.hmap.get(chunkname);
+    value.peers.add(peer);
+    saveHmap();
+  }
+
   public void loadHmap() throws IOException{
     File logfile = new File(this.logFileName);
 
@@ -50,7 +56,7 @@ public class StoredControl{
         if(split.length == 3){
           String chunkname = split[0];
           int replicationDeg = Integer.parseInt(split[1]);
-          String[] peers = split[3].split(",");
+          String[] peers = split[2].split(",");
           this.addNewLog(chunkname,replicationDeg,peers);
         }else if(split.length == 2){
           String chunkname = split[0];
@@ -83,21 +89,22 @@ public class StoredControl{
     out.close();
   }
 
-/*  public void updateRepDeg(String chunckname) throws IOException{
+ /*public void updateRepDeg(String chunckname) throws IOException{
     Value oldvalue = this.hmap.get(chunckname);
     this.addNewLog(oldvalue.filename,chunckname,oldvalue.replicationDeg,oldvalue.atualReplicationDeg + 1);
-  }
+  }*/
 
-  public int getRepDeg(String chunckname){
+/*  public int getRepDeg(String chunckname){
     return this.hmap.get(chunckname).replicationDeg;
   }
-
-  public int getAtualRepDeg(String chunckname){
+*/
+/*  public int getAtualRepDeg(String chunckname){
     return this.hmap.get(chunckname).atualReplicationDeg;
-  }
+  }*/
 
-  public boolean isChunkOwner(String chunckname){
+  public boolean isChunkStored(String chunckname){
     Value value = this.hmap.get(chunckname);
+    System.out.println(this.hmap.size());
 
     if(value != null)
       return true;
@@ -105,7 +112,15 @@ public class StoredControl{
     return false;
   }
 
-  public void deleteAllEntries(String fileId) throws IOException{
+  public boolean isPeerStored(String chunkname,String peer){
+    ArrayList<String> peers = hmap.get(chunkname).peers;
+    int index = peers.indexOf(peer);
+    if(index != -1)
+      return true;
+    return false;
+  }
+
+  /*public void deleteAllEntries(String fileId) throws IOException{
 
     for(Iterator<Map.Entry<String, Value>> i = this.hmap.entrySet().iterator(); i.hasNext(); ){
       Map.Entry<String, Value> entry = i.next();
@@ -117,27 +132,5 @@ public class StoredControl{
       }
     }
     saveHmap();
-  }
-
-  public String getFileIdByFilename(String filename){
-    for(Map.Entry<String, Value> entry: this.hmap.entrySet()) {
-        String current_filename = entry.getValue().filename;
-        if(filename.equals(current_filename)){
-          return entry.getKey().split("_")[0];
-        }
-    }
-    return null;
-  }
-
-  public int getNumberOfChunks(String filename){
-    int n_chunks = 0;
-
-    for(Map.Entry<String, Value> entry: this.hmap.entrySet()) {
-        String current_filename = entry.getValue().filename;
-        if(filename.equals(current_filename)){
-          n_chunks++;
-        }
-    }
-    return n_chunks;
   }*/
 }

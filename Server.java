@@ -73,12 +73,12 @@ public class Server{
             Message message = new Message(packet.getData());
             String chunkname = message.getFileId()+"_"+message.getChunkNo();
             if(message.getsenderid() != server_id && myfiles.isFileOwner(message.getFileId())){
-                System.out.println("Received: "+message.getsenderid());
                 if(!control.isStored(chunkname,message.getsenderid())){
-                  System.out.println("Stored");
                   control.addNewLog(chunkname,message.getsenderid(),message.getChunkNo());
                 }
-
+            }else if(message.getsenderid() != server_id && storedcontrol.isChunkStored(chunkname)){
+                if(!storedcontrol.isPeerStored(chunkname,new String(""+message.getsenderid())))
+                  storedcontrol.addNewPeer(chunkname,new String(""+message.getsenderid()));
             }
           }
           if(type.equals("GETCHUNK")){
