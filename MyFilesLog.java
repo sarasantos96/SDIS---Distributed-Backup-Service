@@ -36,6 +36,11 @@ public class MyFilesLog{
     this.saveHmap();
   }
 
+  public int getNoChunks(String fileId){
+    Value value = this.hmap.get(fileId);
+    return value.nChunks;
+  }
+
   public void loadHmap() throws IOException{
     File logfile = new File(this.logFileName);
 

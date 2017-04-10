@@ -160,31 +160,9 @@ public class Server{
           mdrsocket.receive(packet);
           byte[] data = new byte[packet.getLength()];
           System.arraycopy(packet.getData(), 0, data, 0, packet.getLength());
-          //System.out.println(packet.getData().length);
-          //System.out.println(new String(packet.getData()));
           RestoreMessage rm = new RestoreMessage(data);
           Runnable task = new SaveRestoreChunkTask(rm,server_id);
           peerExecutor.execute(task);
-          /*
-          Message msg = new Message(packet.getData());
-          if(server_id != msg.getsenderid()){
-            System.out.println("MDR message: "+ "restore");
-*/
-            //TODO: código repetido
-            /*File input_file = new File("./Peer"+server_id+"/r_test.txt");
-            if(input_file.exists() && !input_file.isDirectory()){
-              System.out.println("ei");
-              FileInputStream file_input_stream = new FileInputStream(input_file);
-              int n_bytes = (int) input_file.length();
-              byte[] file_bytes = new byte[n_bytes];
-              int read = file_input_stream.read(file_bytes,0,n_bytes);
-              file_input_stream.close();
-              System.out.println(new String(file_bytes));
-              packet = new DatagramPacket(file_bytes,file_bytes.length,mdr_inetAddr,mdr_port);
-              mdrsocket.send(packet);
-              Thread.sleep(400);
-            }*//*
-          }*/
         }
       }catch(Exception e){
         System.err.println("Server exception: " + e.toString());
