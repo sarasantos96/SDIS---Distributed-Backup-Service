@@ -71,7 +71,9 @@ class ReclaimTask implements Runnable{
       HashMap<String, Long> map = listFiles(listOfFiles);
       long space = calculateTotalSpace(map);
 
-      while(space > target_space && filenames.size()>0){
+      Long obj = space - target_space;
+
+      while(space > obj && filenames.size()>0){
         String filename = filenames.get(0).getName();
         File file = new File(path+"/"+filename);
         file.delete();
@@ -87,7 +89,7 @@ class ReclaimTask implements Runnable{
         sendMCMessage(msg);
         this.storedcontrol.deleteAllEntries(filename);
       }
-      this.size.setSize(target_space);
+      this.size.setSize(obj);
     }
 
     @Override
