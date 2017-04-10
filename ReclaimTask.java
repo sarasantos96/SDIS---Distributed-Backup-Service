@@ -16,9 +16,9 @@ class ReclaimTask implements Runnable{
     private InetAddress mcaddr;
     private int mc_port;
     private int id;
-    private Long size;
+    private Size size;
 
-    public ReclaimTask(String path, long target_space, StoredControl storedcontrol,int id,Long size, MulticastSocket mcsocket, InetAddress mcaddr, int mc_port){
+    public ReclaimTask(String path, long target_space, StoredControl storedcontrol,int id,Size size, MulticastSocket mcsocket, InetAddress mcaddr, int mc_port){
       this.path = path;
       this.storedcontrol = storedcontrol;
       this.id = id;
@@ -26,6 +26,7 @@ class ReclaimTask implements Runnable{
       this.mcsocket = mcsocket;
       this.mcaddr = mcaddr;
       this.mc_port = mc_port;
+      this.target_space = target_space;
     }
 
     public static HashMap<String, Long> listFiles(File[] listOfFiles){
@@ -86,7 +87,7 @@ class ReclaimTask implements Runnable{
         sendMCMessage(msg);
         this.storedcontrol.deleteAllEntries(filename);
       }
-      this.size = new Long(target_space);
+      this.size.setSize(target_space);
     }
 
     @Override

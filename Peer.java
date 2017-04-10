@@ -17,7 +17,7 @@ public class Peer{
   private Server server;
   private int serverid;
   private ServerThread thread;
-  private Long size;
+  private Size size;
 
   private ExecutorService executor;
   private ReplicationControl control;
@@ -33,7 +33,7 @@ public class Peer{
     this.mdb_port = mdb_port;
     this.mdr_addr = mdr_addr;
     this.mdr_port = mdr_port;
-    this.size = new Long(50000000);
+    this.size = new Size(50000000);
 
 
     //Initiate Thread Pool

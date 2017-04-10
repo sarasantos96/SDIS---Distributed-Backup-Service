@@ -15,10 +15,10 @@ class BackupTask implements Runnable
     private MulticastSocket mcsocket;
     private InetAddress mc_inetAddr;
     private int mc_port;
-    private Long size;
+    private Size size;
     private StoredControl storedcontrol;
 
-    public BackupTask(Message message, int server_id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port,Long size,StoredControl storedcontrol)
+    public BackupTask(Message message, int server_id, MulticastSocket mcsocket, InetAddress mc_inetAddr, int mc_port,Size size,StoredControl storedcontrol)
     {
         this.message = message;
         this.server_id = server_id;
@@ -40,7 +40,7 @@ class BackupTask implements Runnable
     }
 
     public void saveChunck(byte[] receive_bytes) throws FileNotFoundException, IOException, InterruptedException{
-      if(folderSize() + receive_bytes.length < this.size){
+      if(folderSize() + receive_bytes.length < this.size.getSize()){
         String directory = new String("Peer"+this.server_id+ "/"+this.message.getFileId()+"_"+this.message.getChunkNo());
         File file = new File(directory);
         FileOutputStream fos = new FileOutputStream(directory);

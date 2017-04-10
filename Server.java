@@ -25,11 +25,11 @@ public class Server{
   private MDRThread mdrthread;
   private ExecutorService peerExecutor;
   private ReplicationControl control;
-  private Long size;
+  private Size size;
   private MyFilesLog myfiles;
   private StoredControl storedcontrol;
 
-  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor, ReplicationControl control,Long size,MyFilesLog myfiles,StoredControl storedcontrol) throws IOException{
+  public Server(String mc_addr, int mc_port, int serverid , String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ExecutorService peerExecutor, ReplicationControl control,Size size,MyFilesLog myfiles,StoredControl storedcontrol) throws IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
@@ -133,7 +133,7 @@ public class Server{
           byte[] data = new byte[packet.getLength()];
           System.arraycopy(packet.getData(), 0, data, 0, packet.getLength());
           Message msg = new Message(data);
-          if(server_id != msg.getsenderid()){
+          if(server_id != msg.getsenderid() && !myfiles.isFileOwner(msg.getFileId())){
             System.out.println("MDB message: "+ "backup");
             Runnable task = new BackupTask(msg,server_id,mcsocket,mc_inetAddr,mc_port,size,storedcontrol);
             peerExecutor.execute(task);

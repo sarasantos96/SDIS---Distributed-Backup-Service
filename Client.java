@@ -34,7 +34,7 @@ public class Client implements RMI_Interface{
   private MulticastSocket mdrsocket;
   private int id;
   private ReplicationControl control;
-  private Long size;
+  private Size size;
   private ExecutorService executor;
   private MyFilesLog myfiles;
   private StoredControl storedcontrol;
@@ -52,7 +52,7 @@ public class Client implements RMI_Interface{
         String current_path = new java.io.File( "." ).getCanonicalPath();
         boolean isNumeric = arg1.matches("-?\\d+(\\.\\d+)?");
         if(isNumeric){
-          Runnable reclaimtask = new ReclaimTask(current_path + "/Peer" + id, Integer.parseInt(arg1),storedcontrol,id,size,mcsocket,mcaddr, mc_port);
+          Runnable reclaimtask = new ReclaimTask(current_path + "/Peer" + id, Integer.parseInt(arg1),storedcontrol,id,this.size,mcsocket,mcaddr, mc_port);
           executor.execute(reclaimtask);
         }
         else
@@ -71,7 +71,7 @@ public class Client implements RMI_Interface{
 
   public Client() {}
 
-  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control, Long size,ExecutorService executor,MyFilesLog myfiles,StoredControl storedcontrol) throws UnknownHostException, InterruptedException, IOException{
+  public Client(int id, String mc_addr, int mc_port, String mdb_addr, int mdb_port, String mdr_addr, int mdr_port, ReplicationControl control, Size size,ExecutorService executor,MyFilesLog myfiles,StoredControl storedcontrol) throws UnknownHostException, InterruptedException, IOException{
     this.mc_addr = mc_addr;
     this.mc_port = mc_port;
     this.mdb_addr = mdb_addr;
