@@ -89,9 +89,15 @@ public class StoredControl{
     out.close();
   }
 
-/*  public int getAtualRepDeg(String chunckname){
-    return this.hmap.get(chunckname).atualReplicationDeg;
-  }*/
+  public int getReplicationDeg(String chunkname){
+    Value value = this.hmap.get(chunkname);
+    return value.replicationDeg;
+  }
+
+  public int getAtualRepDeg(String chunkname){
+    Value value = this.hmap.get(chunkname);
+    return value.peers.size()+1;
+  }
 
   public boolean isChunkStored(String chunckname){
     Value value = this.hmap.get(chunckname);
@@ -118,7 +124,7 @@ public class StoredControl{
       String [] p_array = new String[peers.size()];
       p_array = peers.toArray(p_array);
       addNewLog(chunkname,value.replicationDeg,p_array);
-    }  
+    }
   }
 
   public void deleteAllEntries(String filename) throws IOException{

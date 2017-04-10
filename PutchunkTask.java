@@ -52,13 +52,15 @@ class PutchunkTask implements Runnable
         boolean continues = true;
         int tries = 0;
         String chunkname = new String(fileId+"_"+chunkNo);
+        int time = 1000;
         while(continues && tries < 5){
-          Thread.sleep(1000);
+          Thread.sleep(time);
           if(this.control.getAtualRepDeg(chunkname) < this.replicationDeg)
             socket.send(packet);
           else
             continues = false;
           tries++;
+          time  = time *2;
         }
     }
 
